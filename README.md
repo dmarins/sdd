@@ -11,6 +11,8 @@ Fork de [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills), t
 ```
 DEFINE        PLAN          BUILD         VERIFY        REVIEW        SHIP
 /spec   →    /plan   →    /build   →    /test    →    /review  →    /ship
+					↘
+					 /resume
 ```
 
 | Comando | Quando usar |
@@ -18,6 +20,7 @@ DEFINE        PLAN          BUILD         VERIFY        REVIEW        SHIP
 | `/spec` | Antes de codar qualquer feature nova — define objetivo, estrutura, testes e limites |
 | `/plan` | Com a spec em mãos — quebra o trabalho em tasks com critérios de aceite |
 | `/build` | Implementa a próxima task (TDD embutido: RED → GREEN → commit; pode compor uma skill de perfil por stack) |
+| `/resume` | Retoma uma implementação interrompida reconciliando `/docs` com o estado atual do Git |
 | `/test` | Código legado sem cobertura, ou para isolar e reproduzir um bug |
 | `/code-simplify` | Após o build — limpa sem mudar comportamento |
 | `/review` | Antes de abrir o PR — revisão em 5 eixos (corretude, legibilidade, arquitetura, segurança, performance) |
@@ -27,13 +30,29 @@ DEFINE        PLAN          BUILD         VERIFY        REVIEW        SHIP
 
 ---
 
+## Estado persistido em `/docs`
+
+O workflow passa a usar uma única área persistida para sobreviver a troca de sessão, limite de assinatura e interrupções inesperadas:
+
+| Arquivo | Função |
+|---|---|
+| `/docs/spec.md` | Especificação da feature ou do escopo atual |
+| `/docs/plan.md` | Plano de implementação com fases, dependências e checkpoints |
+| `/docs/tasks.md` | Lista de tarefas com status `TODO`, `IN_PROGRESS`, `BLOCKED` ou `DONE` |
+| `/docs/handoff.md` | Estado operacional atual: task ativa, arquivos tocados, verificações rodadas, blockers e próximo passo |
+
+`/build` atualiza esse estado durante a execução. `/resume` usa esses artefatos para reconstruir o contexto e continuar com o menor retrabalho possível.
+
+---
+
 ## Entrando no meio do projeto
 
 Se já existe uma spec informal ou tarefas planejadas:
 
-1. Peça ao agente para converter o material existente em `SPEC.md` (formato da skill `spec-driven-development`)
-2. Crie `tasks/todo.md` apenas para o escopo atual — não é necessário migrar tudo
-3. A partir daí, `/build` funciona normalmente
+1. Peça ao agente para converter o material existente em `/docs/spec.md` (formato da skill `spec-driven-development`)
+2. Estruture o plano em `/docs/plan.md` e as tarefas em `/docs/tasks.md` apenas para o escopo atual — não é necessário migrar tudo
+3. Inicialize `/docs/handoff.md` com o contexto corrente, mesmo que haja trabalho parcial já em andamento
+4. A partir daí, `/build` e `/resume` funcionam normalmente
 
 ---
 
