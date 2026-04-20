@@ -15,3 +15,26 @@ Revise as alterações atuais (commits recentes ou em fase de preparação) em t
 Classifique as descobertas como Críticas, Importantes ou Sugestões.
 
 Gere uma análise estruturada com referências específicas de arquivo:linha e recomendações de correção.
+
+Se um achado revelar um padrão recorrente, um desvio de convenção do projeto ou um gap claro de skill/processo:
+
+1. Resuma o padrão com evidência concreta
+2. Pergunte se o usuário quer registrar isso via `/learn`
+3. Ao sugerir `/learn`, entregue o contexto mínimo já estruturado:
+	- arquivo ou área afetada
+	- o que foi feito de forma errada
+	- como deveria ser
+	- qual padrão, convenção ou regra foi violado
+4. Sempre que possível, proponha a frase inicial que o usuário pode reaproveitar diretamente, por exemplo:
+
+```text
+/learn no review identificamos que o arquivo X foi alterado de forma errada; deveria seguir Y em vez de Z porque o projeto usa o padrão W
+```
+
+ou:
+
+```text
+/learn o review encontrou duplicação da regra A nos arquivos X e Y; o correto era centralizar isso em Z
+```
+
+5. Não atualize `/docs/lessons.md`, skills ou comandos silenciosamente fora de `/learn` ou sem confirmação humana explícita

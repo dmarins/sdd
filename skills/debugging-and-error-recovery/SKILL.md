@@ -28,7 +28,12 @@ Quando algo inesperado acontecer:
 3. DIAGNOSTIQUE usando o checklist de triagem
 4. CORRIJA a causa raiz
 5. IMPEÇA recorrência com teste e observabilidade
-6. RETOME o trabalho somente após verificar a correção
+6. SE o erro revelar um padrão reutilizável, registre a lição explicitamente via `/learn`, descrevendo:
+	- arquivo ou área afetada
+	- o que foi feito de forma errada
+	- como deveria ser
+	- qual padrão, convenção ou regra foi violado
+7. RETOME o trabalho somente após verificar a correção
 ```
 
 **Não passe por cima de teste falhando ou build quebrado para “terminar depois”.** Erros se acumulam e contaminam o resto da implementação.
@@ -166,7 +171,35 @@ func TestSearchTasksWithSpecialCharacters(t *testing.T) {
 
 Esse teste deve falhar sem a correção e passar com ela.
 
-### Passo 6: Verificar Fim a Fim
+### Passo 6: Elevar a Lição Quando Couber
+
+Nem todo bug merece virar regra global. Quando a correção revelar um padrão reutilizável, trate isso explicitamente:
+
+- Se for um caso local da feature ou do projeto, registre em `/docs/lessons.md` como lição local
+- Se o erro mostrar um gap claro de processo, skill ou convenção, use `/learn` para promover a regra para o artefato correto
+- Não altere skills, comandos ou instruções silenciosamente durante o debug; a promoção precisa de gatilho explícito
+
+Ao acionar `/learn`, não passe só o nome do problema. Leve sempre o contexto mínimo:
+
+- arquivo ou área afetada
+- o que foi feito de forma errada
+- como deveria ser
+- qual padrão, convenção ou regra foi violado
+
+Sinais de que vale promover:
+
+- o mesmo tipo de erro já apareceu antes
+- a falha veio de uma alucinação previsível do agente
+- a revisão detectou desvio recorrente do padrão do projeto
+- a prevenção pode ser expressa como regra reutilizável e falsificável
+
+Exemplo:
+
+```text
+/learn no debug identificamos que o arquivo X foi alterado fora do padrão; deveria seguir Y em vez de Z porque o projeto usa W
+```
+
+### Passo 7: Verificar Fim a Fim
 
 Depois de corrigir, verifique o cenário completo:
 
@@ -309,3 +342,4 @@ Depois de corrigir um bug:
 - [ ] Todos os testes existentes passam
 - [ ] O build passa
 - [ ] O cenário original foi verificado de ponta a ponta
+- [ ] Se o erro revelou padrão reutilizável, a lição foi registrada ou escalada via `/learn`

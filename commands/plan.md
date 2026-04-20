@@ -13,6 +13,7 @@ Leia a especificação existente em `/docs/spec.md` (ou equivalente a migrar par
 5. Adicione pontos de verificação entre as fases
 6. Estruture `/docs/tasks.md` para que cada tarefa registre, no mínimo: identificador, status, dependências, critérios de aceitação, verificações e próximo checkpoint esperado
 7. Inicialize `/docs/handoff.md` com: escopo atual, task ativa `Nenhuma`, riscos conhecidos, pendências abertas e instruções de retomada
-8. Apresente o plano para revisão humana
+8. Inicialize `/docs/lessons.md` com o template de lições aprendidas, mesmo que ainda não haja entradas
+9. Apresente o plano para revisão humana
 
-Salve o plano em `/docs/plan.md`, a lista de tarefas em `/docs/tasks.md` e o estado operacional inicial em `/docs/handoff.md`.
+Salve o plano em `/docs/plan.md`, a lista de tarefas em `/docs/tasks.md`, o estado operacional inicial em `/docs/handoff.md` e o registro de lições em `/docs/lessons.md`.

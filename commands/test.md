@@ -15,5 +15,10 @@ Para correções de bugs (padrão Prove-It):
 3. Implemente a correção
 4. Confirme se o teste passa
 5. Execute o conjunto completo de testes para regressões
+6. Se o bug expuser um gap recorrente de processo, convenção ou skill, recomende registrar a lição via `/learn` após a correção estar verificada, levando ao comando:
+	- arquivo ou área afetada
+	- o que falhou ou foi decidido de forma errada
+	- como deveria ser
+	- qual padrão, convenção ou regra foi violado
 
 Para problemas relacionados ao navegador (caso seja alguma aplicação frontend), invoque também `browser-testing-with-devtools` para verificar com o Chrome DevTools MCP.

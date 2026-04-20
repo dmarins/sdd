@@ -84,6 +84,8 @@ Crie um arquivo de regras persistente entre sessões. Esse é o contexto de maio
 
 Carregue apenas a seção relevante do spec ao iniciar uma feature. Não despeje a documentação inteira quando só uma parte importa.
 
+Se o projeto mantiver `/docs/lessons.md`, carregue também as lições `OPEN` ou recentemente `PROMOTED` que sejam relevantes à tarefa. Elas são contexto de alto valor porque condensam erros já confirmados.
+
 **Eficiente:** “Segue a seção do spec sobre autenticação de webhooks.”
 
 **Desperdício:** “Segue o documento completo de 5.000 linhas.” quando você só vai tocar no consumidor de SQS.
@@ -147,6 +149,7 @@ No início da sessão, entregue ao agente o bloco mínimo completo:
 CONTEXTO DO PROJETO:
 - Estamos construindo [X] com Go, AWS e Terraform
 - A secao relevante do spec e: [trecho]
+- Licoes abertas ou recentemente promovidas: [lista curta]
 - Restrições principais: [lista]
 - Arquivos envolvidos: [lista curta com funcao de cada um]
 - Padrao semelhante: [arquivo de referencia]

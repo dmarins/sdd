@@ -164,7 +164,35 @@ Toda observação precisa de severidade para separar obrigatório de opcional:
 
 Sem isso, todo comentário vira “será que preciso mudar?” e o review perde eficiência.
 
-### Passo 5: Verificar a Verificação
+### Passo 5: Escalar Padrões Reutilizáveis
+
+Se o review encontrar algo maior do que um ajuste pontual, trate isso como candidato a lição:
+
+- desvio recorrente da convenção do projeto
+- alucinação previsível do agente em mais de uma mudança
+- gap claro de processo, checklist ou skill
+- falso positivo de review que precise ser desambiguado no workflow
+
+Nesses casos:
+
+1. Resuma a lição com evidência concreta
+2. Sugira registrar a lição via `/learn`
+3. Ao encaminhar para `/learn`, entregue o contexto mínimo já estruturado:
+    - arquivo ou área afetada
+    - o que foi feito de forma errada
+    - como deveria ser
+    - qual padrão, convenção ou regra foi violado
+4. Só promova para skill, comando ou instrução quando houver gatilho explícito do usuário ou do próprio `/learn`
+
+Formato recomendado:
+
+```text
+/learn no review identificamos que o arquivo X foi alterado de forma errada; deveria seguir Y em vez de Z porque o projeto usa o padrão W
+```
+
+Review bom não corrige apenas o diff atual; ele melhora a chance de o mesmo erro não voltar.
+
+### Passo 6: Verificar a Verificação
 
 Avalie a história de verificação do autor:
 
@@ -278,6 +306,9 @@ Parte da revisão é revisar dependências:
 - [ ] Casos de borda foram tratados
 - [ ] Caminhos de erro foram tratados
 - [ ] Testes cobrem a mudança adequadamente
+
+### Aprendizado
+- [ ] Achados recorrentes ou generalizáveis foram escalados via `/learn` quando apropriado
 
 ### Legibilidade
 - [ ] Nomes sao claros e consistentes

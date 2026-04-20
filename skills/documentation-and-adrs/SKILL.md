@@ -241,6 +241,22 @@ Para features entregues:
 - Timeout da Lambda `task-api` reduzido para 10s com retry controlado (#126)
 ```
 
+## Lessons Learned vs Gotchas vs ADRs
+
+Use o artefato certo para o tipo certo de aprendizado:
+
+- **`/docs/lessons.md`**: ponto de entrada para erro validado, achado de review ou gap de processo. Toda lição começa aqui.
+- **Gotcha inline**: quando a prevenção precisa ficar colada ao código afetado para evitar recaída naquele ponto específico.
+- **Skill, comando ou instrução**: quando a lição é generalizável e deve mudar o comportamento futuro do workflow.
+- **ADR**: quando a lição expõe uma decisão arquitetural, trade-off duradouro ou mudança cara de reverter.
+
+Regra prática:
+
+1. Registre a lição em `/docs/lessons.md`
+2. Se ela for apenas local, pare aí ou complemente com gotcha inline
+3. Se ela for global, promova para o artefato correto com referência ao `lesson ID`
+4. Se o impacto for arquitetural, complemente com ADR em vez de esconder tudo dentro da lição
+
 ## Promover de Planejado para Implementado
 
 Quando o projeto separar documentação de planejamento e documentação de funcionalidade já entregue, trate essa promoção como parte da conclusão da tarefa.
@@ -261,6 +277,7 @@ Considerações especiais para contexto de IA:
 - **Arquivos de regras** como `.github/copilot-instructions.md` documentam convenções do projeto
 - **Specs** evitam que agentes implementem comportamento errado
 - **ADRs** explicam por que decisões antigas existem e evitam rediscussão
+- **Lessons learned** preservam erros confirmados e a promoção explícita das regras que nasceram deles
 - **Gotchas inline** impedem que agentes caiam em armadilhas recorrentes
 - **OpenAPI/AsyncAPI** ajudam agentes a gerar handlers, clients e testes coerentes
 
