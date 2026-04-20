@@ -53,6 +53,19 @@ Pull Request Aberto
 
 **Nenhum gate deve ser pulado.** Se `go vet` falha, corrija o código. Se `terraform validate` falha, corrija o módulo. Não transforme o pipeline em decoração.
 
+## Quando Código e Pipeline Precisam Mudar Juntos
+
+Sempre que a mudança introduzir um novo entrypoint, recurso de infraestrutura, pacote relevante de build ou fluxo crítico de deploy, revise também a automação.
+
+Checklist rápido:
+
+- O pipeline ainda compila tudo o que precisa compilar?
+- Os testes certos estão sendo executados para a nova superfície?
+- A validação de infraestrutura cobre o módulo ou ambiente alterado?
+- Existem smoke tests, alarmes ou checks mínimos para o comportamento novo?
+
+Se a resposta for "não sei", o pipeline ainda não representa corretamente a mudança.
+
 ## Configuração com GitHub Actions
 
 ### Pipeline Base de CI

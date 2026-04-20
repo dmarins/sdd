@@ -17,7 +17,7 @@ DEFINE        PLAN          BUILD         VERIFY        REVIEW        SHIP
 |---|---|
 | `/spec` | Antes de codar qualquer feature nova — define objetivo, estrutura, testes e limites |
 | `/plan` | Com a spec em mãos — quebra o trabalho em tasks com critérios de aceite |
-| `/build` | Implementa a próxima task (TDD embutido: RED → GREEN → commit) |
+| `/build` | Implementa a próxima task (TDD embutido: RED → GREEN → commit; pode compor uma skill de perfil por stack) |
 | `/test` | Código legado sem cobertura, ou para isolar e reproduzir um bug |
 | `/code-simplify` | Após o build — limpa sem mudar comportamento |
 | `/review` | Antes de abrir o PR — revisão em 5 eixos (corretude, legibilidade, arquitetura, segurança, performance) |
@@ -59,6 +59,7 @@ Se já existe uma spec informal ou tarefas planejadas:
 | `source-driven-development` | Decisões baseadas na documentação oficial (com citação de fonte) |
 | `frontend-ui-engineering` | Componentes, design system, acessibilidade WCAG 2.1 AA |
 | `api-and-interface-design` | Design contract-first, semântica de erros, validação de boundary |
+| `go-aws-serverless-development` | Perfil de execução para projetos Go + AWS + Terraform sem inflar o comando `build` |
 
 ### Verify
 | Skill | Uso |

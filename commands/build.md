@@ -4,6 +4,8 @@ description: Implemente a próxima tarefa incrementalmente — compile, teste, v
 
 Invoque a skill `incremental-implementation` juntamente com a skill `test-driven-development`.
 
+Se a tarefa estiver claramente no contexto de projetos Go com AWS e Terraform, invoque também a skill `go-aws-serverless-development` como perfil complementar de execução.
+
 Selecione a próxima tarefa pendente no plano. Para cada tarefa:
 
 1. Leia os critérios de aceitação da tarefa

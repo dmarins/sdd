@@ -187,6 +187,18 @@ E um fluxo crítico que precisa funcionar do inicio ao fim?
   -> teste ponta a ponta, com parcimonia
 ```
 
+### Cobertura por Fronteira
+
+Quando a mudança tocar fronteiras reais como HTTP, filas, eventos, banco, IAM ou infraestrutura, não encerre a validação só porque a suite unitária passou.
+
+Use esta regra prática:
+
+- Regra de negócio isolada: teste unitário
+- Adapter, handler ou client: unitário + integração
+- Wiring de infraestrutura ou fluxo crítico ponta a ponta: integração + uma validação E2E ou smoke test relevante
+
+O nome exato do comando pode variar entre projetos. O que não varia é a obrigação de provar a parte mais arriscada da mudança.
+
 ## Escrevendo Bons Testes
 
 ### Teste Estado, Não Implementação Interna

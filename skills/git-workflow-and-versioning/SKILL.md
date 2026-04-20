@@ -141,6 +141,24 @@ chore/<descricao-curta>     -> chore/update-go-version
 refactor/<descricao-curta>  -> refactor/task-service
 ```
 
+### Checagem de Freshness Antes de Começar
+
+Antes de iniciar uma mudança relevante, confira se sua base está atualizada em relação ao trunk principal:
+
+```bash
+# Ver branch atual
+git branch --show-current
+
+# Estando em main, atualize antes de abrir a branch
+git pull origin main
+
+# Estando em branch de trabalho, confira a distancia para main
+git fetch origin
+git log HEAD..origin/main --oneline
+```
+
+Se houver divergencia relevante, integre isso cedo. Conflito descoberto no fim do trabalho custa mais do que conflito descoberto no inicio.
+
 ## Trabalhando com Worktrees
 
 Para trabalho paralelo com múltiplos agentes, use `git worktree`:

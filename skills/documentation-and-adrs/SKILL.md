@@ -241,6 +241,19 @@ Para features entregues:
 - Timeout da Lambda `task-api` reduzido para 10s com retry controlado (#126)
 ```
 
+## Promover de Planejado para Implementado
+
+Quando o projeto separar documentação de planejamento e documentação de funcionalidade já entregue, trate essa promoção como parte da conclusão da tarefa.
+
+Fluxo recomendado:
+
+1. Valide a implementação final e as verificações operacionais
+2. Remova ou atualize o item no material de planejamento
+3. Promova o conteúdo equivalente para a documentação de implementado
+4. Ajuste README, runbook, changelog ou índice quando a nova feature mudar a navegação da documentação
+
+Não deixe o projeto em um estado em que a feature já existe no código, mas continue aparecendo só como plano.
+
 ## Documentação para Agentes
 
 Considerações especiais para contexto de IA:

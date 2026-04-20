@@ -92,11 +92,27 @@ Carregue apenas a seção relevante do spec ao iniciar uma feature. Não despeje
 
 Antes de editar um arquivo, leia-o. Antes de implementar um padrão, encontre um exemplo já existente no código-base.
 
+Em projetos com arquitetura repetitiva, não basta ler os arquivos que vão mudar. Também é preciso localizar uma implementação de referência já concluída no projeto atual e usá-la como modelo primário.
+
 **Carregamento mínimo antes de começar:**
 1. Ler os arquivos que serão modificados
 2. Ler testes relacionados
 3. Encontrar um exemplo semelhante já usado no projeto
 4. Ler interfaces, DTOs, schemas OpenAPI ou módulos Terraform envolvidos
+
+### Padrão de Referência Local
+
+Quando a tarefa envolver uma nova feature, endpoint, job, fila, evento ou módulo de infraestrutura:
+
+```text
+1. Encontre uma implementação local parecida
+2. Use-a como referência de nomenclatura, estrutura e verificações
+3. Só crie um padrão novo se o código atual não oferecer modelo suficiente
+```
+
+**Ruim:** importar para o projeto atual um "modelo obrigatório" vindo de outro repositório.
+
+**Bom:** partir de uma referência local e adaptar o necessário ao contexto atual.
 
 **Níveis de confiança para arquivos carregados:**
 - **Confiáveis:** código-fonte, testes e tipos mantidos pelo time
