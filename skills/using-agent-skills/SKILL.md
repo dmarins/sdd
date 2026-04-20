@@ -31,6 +31,7 @@ Tarefa chega
     │   ├── Risco de segurança? -------------> security-and-hardening
     │   └── Risco de performance? -----------> performance-optimization
     ├── Commit, branch ou histórico? --------> git-workflow-and-versioning
+    ├── Atualizando Go ou módulos Go? -------> go-runtime-and-dependency-upgrades
     ├── Pipeline e automação? ---------------> ci-cd-and-automation
     ├── Documentação ou ADR? ----------------> documentation-and-adrs
     └── Deploy ou release? ------------------> shipping-and-launch
@@ -153,6 +154,8 @@ Para uma feature completa, a sequência usual é:
 
 Nem toda tarefa usa todas as skills. Um bug fix pode precisar apenas de `debugging-and-error-recovery` -> `test-driven-development` -> `code-review-and-quality`.
 
+Workflows de manutenção também podem fugir do lifecycle principal. Exemplo: upgrade de runtime Go ou dependências pode começar diretamente em `go-runtime-and-dependency-upgrades` e depois acionar `ci-cd-and-automation`, `deprecation-and-migration` ou `debugging-and-error-recovery` conforme o impacto.
+
 ## Referência Rápida
 
 | Fase | Skill | Resumo em uma linha |
@@ -171,6 +174,7 @@ Nem toda tarefa usa todas as skills. Um bug fix pode precisar apenas de `debuggi
 | Revisar | code-review-and-quality | Faz revisão com critérios de qualidade |
 | Revisar | security-and-hardening | Aplica OWASP, IAM, segredos e menor privilégio |
 | Revisar | performance-optimization | Mede primeiro e otimiza o que realmente importa |
+| Manter | go-runtime-and-dependency-upgrades | Atualiza runtime Go e módulos com validação, CI e rollback |
 | Entregar | git-workflow-and-versioning | Mantém commits atômicos e histórico limpo |
 | Entregar | ci-cd-and-automation | Automatiza gates de qualidade |
 | Entregar | documentation-and-adrs | Documenta o porquê e não só o que |

@@ -84,6 +84,11 @@ Se já existe uma spec informal ou tarefas planejadas:
 | `documentation-and-adrs` | ADRs — documentar o *porquê*, não o *o quê* |
 | `shipping-and-launch` | Checklist completo pré-deploy |
 
+### Maintenance
+| Skill | Uso |
+|---|---|
+| `go-runtime-and-dependency-upgrades` | Workflow de manutenção para upgrade de runtime Go, módulos e superfícies associadas como CI, Docker e runtime |
+
 ---
 
 ## Agentes especialistas
