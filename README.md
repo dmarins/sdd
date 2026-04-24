@@ -6,6 +6,44 @@ Fork de [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills), t
 
 ---
 
+## Setup do path global do Claude Code
+
+Para adicionar os itens deste repositório dentro da estrutura global do Claude Code, rode:
+
+```bash
+bash scripts/setup-claude-links.sh
+```
+
+O script cria links simbólicos para os filhos diretos de `agents`, `commands` e `skills` em:
+
+- `CLAUDE_CONFIG_DIR` (quando definido)
+- fallback: `~/.claude`
+
+Comportamento em colisões de nome no destino:
+
+- sempre substitui o item existente por um novo symlink apontando para este repositório
+- em `skills`, o symlink é feito no diretório da skill; `SKILL.md` e demais arquivos internos são incluídos automaticamente
+
+Compatibilidade:
+
+- Linux e macOS: usa `ln -s`
+- Windows (Git Bash): tenta `ln -s` e faz fallback para `mklink` quando necessário
+- Windows (WSL): usa fluxo Linux normal
+
+Exemplo com destino customizado:
+
+```bash
+CLAUDE_CONFIG_DIR="$HOME/.claude" bash scripts/setup-claude-links.sh
+```
+
+Exemplo em modo simulação (sem alterar arquivos):
+
+```bash
+bash scripts/setup-claude-links.sh --dry-run
+```
+
+---
+
 ## Fluxo de desenvolvimento
 
 ```
