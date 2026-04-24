@@ -14,7 +14,7 @@ Para adicionar os itens deste repositório dentro da estrutura global do Claude 
 bash scripts/setup-claude-links.sh
 ```
 
-O script cria links simbólicos para os filhos diretos de `agents`, `commands` e `skills` em:
+O script cria links simbólicos para os filhos diretos de `agents`, `commands`, `skills` e `hooks` em:
 
 - `CLAUDE_CONFIG_DIR` (quando definido)
 - fallback: `~/.claude`

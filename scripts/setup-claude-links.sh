@@ -170,6 +170,7 @@ fi
 sync_group "agents"
 sync_group "commands"
 sync_group "skills"
+sync_group "hooks"
 
 if [[ "$DRY_RUN" -eq 1 ]]; then
   STATUS="dry-run"
