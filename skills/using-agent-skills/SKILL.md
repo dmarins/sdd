@@ -30,6 +30,7 @@ Tarefa chega
     ├── Revisando código? -------------------> code-review-and-quality
     │   ├── Risco de segurança? -------------> security-and-hardening
     │   └── Risco de performance? -----------> performance-optimization
+    ├── Comentários de revisão abertos no PR? -> pr-review-comments
     ├── Commit, branch ou histórico? --------> git-workflow-and-versioning
     ├── Atualizando Go ou módulos Go? -------> go-runtime-and-dependency-upgrades
     ├── Pipeline e automação? ---------------> ci-cd-and-automation
@@ -172,6 +173,7 @@ Workflows de manutenção também podem fugir do lifecycle principal. Exemplo: u
 | Verificar | browser-testing-with-devtools | Usa DevTools para verificação runtime em browser |
 | Verificar | debugging-and-error-recovery | Reproduz, localiza, corrige e protege |
 | Revisar | code-review-and-quality | Faz revisão com critérios de qualidade |
+| Revisar | pr-review-comments | Processa comentários de revisão de PR com análise crítica e gates de confirmação |
 | Revisar | security-and-hardening | Aplica OWASP, IAM, segredos e menor privilégio |
 | Revisar | performance-optimization | Mede primeiro e otimiza o que realmente importa |
 | Manter | go-runtime-and-dependency-upgrades | Atualiza runtime Go e módulos com validação, CI e rollback |
