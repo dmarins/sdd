@@ -17,6 +17,18 @@ Construa interfaces com qualidade de produção, acessíveis, performáticas e v
 - Ao adicionar interatividade ou gerenciamento de estado
 - Ao corrigir problemas visuais ou de UX
 
+## Consulta ao Protótipo Visual (L008)
+
+**Antes de implementar** qualquer tela ou componente, consulte o protótipo visual do projeto se disponível:
+
+1. Use `mcp__stitch__list_screens` para listar as telas do projeto Stitch
+2. Use `mcp__stitch__get_screen` para obter o protótipo das telas-alvo
+3. Consulte também os arquivos de spec visual locais (ex.: `docs/{entidade}-ui.md`)
+
+**Depois de implementar**, consulte novamente as mesmas telas no Stitch e compare visualmente com o resultado entregue. Divergências intencionais (ex.: decisão técnica que conflita com o design) devem ser registradas no handoff ou num ADR.
+
+Se o projeto não tiver Stitch configurado, pule esta etapa — mas registre que não há protótipo disponível.
+
 ## Arquitetura de Componentes
 
 ### Estrutura de Arquivos
@@ -161,6 +173,51 @@ Não pule níveis de heading. Não use estilo de heading em conteúdo que não s
 - Use tokens semânticos de cor: `text-primary`, `bg-surface`, `border-default`, e não valores hexadecimais crus
 - Garanta contraste suficiente (4.5:1 para texto normal, 3:1 para texto grande)
 - Não dependa apenas de cor para comunicar informação; use também ícones, texto ou padrões
+
+## Integração com Design System via Package Local
+
+> **Gotcha (L001)** — validado em produção. Ignorar esta etapa bloqueia o build.
+
+Quando o projeto usa um design system instalado como `file:../caminho` no `package.json`,
+verifique o exports map **antes de qualquer import de componente**:
+
+```bash
+# 1. Abra node_modules/@dlabs/design-system/package.json e encontre:
+"exports": { ".": { "import": "./dist/index.js", ... } }
+
+# 2. Verifique se o arquivo apontado é realmente ESM:
+head -1 node_modules/@dlabs/design-system/dist/index.js
+# Se começar com 'use strict' ou usar require() → é CJS, não ESM
+# O bundle ESM real geralmente fica em dist/index.mjs
+```
+
+Se a condição `"import"` aponta para CJS, o Vite/Rollup não consegue analisar
+os named exports estaticamente e o build falha com erros como:
+
+```
+"Button" is not exported by "../my-design-system/dist/index.js"
+```
+
+**Correção**: aliases explícitos em `vite.config.ts` que sobrescrevem o exports map:
+
+```ts
+import { fileURLToPath } from 'url'
+import path from 'path'
+
+const __dirname = fileURLToPath(new URL('.', import.meta.url))
+const ds = (p: string) => path.resolve(__dirname, '../my-design-system', p)
+
+resolve: {
+  alias: [
+    { find: /^@meu\/design-system\/styles$/,          replacement: ds('src/styles/globals.css') },
+    { find: /^@meu\/design-system\/tailwind-preset$/, replacement: ds('src/tailwind-preset.ts') },
+    { find: /^@meu\/design-system$/,                  replacement: ds('dist/index.mjs') },
+  ],
+  dedupe: ['react', 'react-dom'], // evita múltiplas instâncias de React
+},
+```
+
+> **Referência**: ADR-001 no projeto (`docs/decisions/ADR-001.md`) e lição L001 (`docs/lessons.md`).
 
 ## Acessibilidade (WCAG 2.1 AA)
 

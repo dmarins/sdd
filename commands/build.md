@@ -6,6 +6,10 @@ Invoque a skill `incremental-implementation` juntamente com a skill `test-driven
 
 Se a tarefa estiver claramente no contexto de projetos Go com AWS e Terraform, invoque também a skill `go-aws-serverless-development` como perfil complementar de execução.
 
+Se a tarefa tocar componentes React, páginas, layout, interação ou qualquer output visível no browser, invoque também a skill `frontend-ui-engineering` como perfil complementar de execução. (L007)
+
+Para tarefas de frontend com protótipo disponível (ex.: Google Stitch), consulte as telas-alvo via `mcp__stitch__*` antes de iniciar (passo 3) e ao finalizar (passo 8) para validar fidelidade ao design. (L008)
+
 Antes de implementar, leia `/docs/plan.md`, `/docs/tasks.md`, `/docs/handoff.md`, `/docs/lessons.md` e verifique o estado atual do Git.
 
 Selecione a task `IN_PROGRESS` existente ou a próxima task `TODO`. Para cada task:
