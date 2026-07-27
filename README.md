@@ -80,6 +80,12 @@ DEFINE        PLAN          BUILD         VERIFY        REVIEW        SHIP
 
 **Caminho de um comando:** rode `/workflow` e o pipeline inteiro executa com gates — ele pergunta o especialista (ROUTE), investiga o código-base (`codebase-analyst`), gera o plano, **para até você aprovar**, implementa task a task delegando a `serverless-backend`/`frontend-react`/`developer`, passa o diff pelo `code-reviewer` e documenta. Reinvocar `/workflow` após qualquer interrupção retoma da fase correta pelo estado em `/docs`.
 
+Três garantias do pipeline que valem destacar:
+
+- **Escritor único:** o especialista implementa e testa, mas quem verifica de forma independente (suíte completa + build), atualiza `/docs` e commita é o agente principal — um commit por task, rollback limpo garantido.
+- **Review retroalimenta o build:** achados `Critical`/`Important` do `code-reviewer` viram fix-tasks e voltam à fase BUILD, com teto de 2 ciclos; persistindo achados, a decisão volta para você.
+- **`/ship` nunca roda sozinho:** ao final, o `/workflow` arquiva os artefatos e apenas *recomenda* o `/ship` — o GO/NO-GO de produção continua seu.
+
 **Caminho manual** (você orquestra cada fase):
 
 1. Rode `/spec` para definir objetivo, limites, testes e restrições.
@@ -171,9 +177,9 @@ O workflow passa a usar uma única área persistida para sobreviver a troca de s
 
 Quando dirigido pelo `/workflow`, o `plan.md` carrega o marker de aprovação (`> Status: DRAFT|APPROVED`), o handoff registra a `## Fase do workflow`, e o encerramento arquiva spec/plan/tasks em `/docs/archive/`. Detalhes em `docs/workflow-state.md`.
 
-### Ajuste de rigor (equivalência com "quality levels")
+### Caminhos rápidos (o pipeline não é obrigação)
 
-Este repositório não tem um knob `quality=pragmatic|balanced|strict` — o rigor de teste e verificação é invariante. O que varia é **quanto de julgamento humano entra entre os passos**:
+O `/workflow` é a esteira completa, não uma imposição — todos os caminhos abaixo continuam válidos. O rigor de teste e verificação é invariante em todos eles (não existe um knob `quality=pragmatic|balanced|strict` como em outros sistemas de pipeline); o que varia é **quanto de julgamento humano entra entre os passos**:
 
 | Se você quer | Use |
 |---|---|
@@ -181,6 +187,7 @@ Este repositório não tem um knob `quality=pragmatic|balanced|strict` — o rig
 | Executar um plano inteiro com um único gate | `/build auto` |
 | Pipeline completo com especialistas e gates | `/workflow` |
 | Pipeline completo parando só em alto risco | `/workflow auto` |
+| Uma perspectiva pontual sobre um artefato | Invocação direta da persona (`code-reviewer`, `security-auditor`…) |
 | Pular o fan-out do `/ship` | Permitido só para ≤2 arquivos, <50 linhas, sem tocar auth/pagamentos/dados/config |
 
 ---
