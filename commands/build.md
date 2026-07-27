@@ -2,11 +2,24 @@
 description: Implemente tarefas incrementalmente — compile, teste, verifique e confirme. Adicione "auto" para executar o plano inteiro em um único passe aprovado.
 ---
 
-Invoque a skill `incremental-implementation` juntamente com a skill `test-driven-development`.
+Invoque a skill `incremental-implementation` juntamente com a skill `test-driven-development`. Essas duas skills formam a base de execução de **toda** task, independentemente do tipo de trabalho.
 
-Se a tarefa estiver claramente no contexto de projetos Go com AWS e Terraform, invoque também a skill `go-aws-serverless-development` como perfil complementar de execução.
+## Delegação por tipo de trabalho
 
-Se a tarefa tocar componentes React, páginas, layout, interação ou qualquer output visível no browser, invoque também a skill `frontend-ui-engineering` como perfil complementar de execução. (L007)
+Antes de implementar cada task, classifique-a explicitamente como **backend**, **frontend** ou **mista**, e invoque a skill de domínio correspondente como perfil complementar de execução:
+
+| Tipo de trabalho | Sinais na task | Skill de domínio |
+|---|---|---|
+| **Backend** | Go, Lambda, DynamoDB, API Gateway, Cognito, Terraform, filas, eventos, IAM | `go-aws-serverless-development` |
+| **Frontend** | Componentes React, páginas, layout, interação, estado de UI, acessibilidade, qualquer output visível no browser | `frontend-ui-engineering` (L007) |
+| **Mista** | Toca ambos os lados (ex.: novo endpoint + tela que o consome) | Ambas — aplique cada skill ao trecho do seu domínio |
+
+Regras da delegação:
+
+- A classificação é **por task**, não por sessão: um plano pode alternar entre tasks de backend e de frontend, e cada uma carrega apenas a skill do seu domínio.
+- Declare a classificação no início da task (ex.: "Task 3 — frontend → `frontend-ui-engineering`"), para que a delegação fique visível e auditável no handoff.
+- Se a task não se encaixar em nenhum tipo (ex.: script utilitário, doc, CI), siga apenas com as skills base — não force uma skill de domínio que não se aplica.
+- Em caso de dúvida sobre a classificação, pare e pergunte antes de implementar — não adivinhe o domínio.
 
 ## Modos
 
@@ -22,20 +35,21 @@ Antes de implementar, leia `/docs/plan.md`, `/docs/tasks.md`, `/docs/handoff.md`
 Selecione a task `IN_PROGRESS` existente ou a próxima task `TODO`. Para cada task:
 
 1. Se a task ainda estiver em `TODO`, marque-a como `IN_PROGRESS` em `/docs/tasks.md`
-2. Atualize `/docs/handoff.md` com objetivo atual, critérios de aceitação ativos, arquivos esperados, lições abertas relevantes e próximo passo planejado
-3. Carregue o contexto relevante (código existente, padrões, tipos)
-4. Escreva um teste que falhe para o comportamento esperado (VERMELHO)
-5. Implemente o código mínimo necessário para passar no teste (VERDE)
-6. Execute o conjunto completo de testes para verificar regressões
-7. Execute a compilação para verificar a compilação
-8. Atualize `/docs/handoff.md` com arquivos tocados, verificações executadas, blockers e o próximo passo exato
-9. Se a implementação ou a correção expuser um padrão reutilizável, registre isso no handoff como candidato a lição e recomende `/learn` com o contexto mínimo já estruturado:
+2. Classifique a task (backend, frontend ou mista) conforme a seção **Delegação por tipo de trabalho** e invoque a skill de domínio correspondente
+3. Atualize `/docs/handoff.md` com objetivo atual, classificação da task e skill de domínio aplicada, critérios de aceitação ativos, arquivos esperados, lições abertas relevantes e próximo passo planejado
+4. Carregue o contexto relevante (código existente, padrões, tipos)
+5. Escreva um teste que falhe para o comportamento esperado (VERMELHO)
+6. Implemente o código mínimo necessário para passar no teste (VERDE)
+7. Execute o conjunto completo de testes para verificar regressões
+8. Execute a compilação para verificar a compilação
+9. Atualize `/docs/handoff.md` com arquivos tocados, verificações executadas, blockers e o próximo passo exato
+10. Se a implementação ou a correção expuser um padrão reutilizável, registre isso no handoff como candidato a lição e recomende `/learn` com o contexto mínimo já estruturado:
 	- arquivo ou área afetada
 	- o que foi feito de forma errada
 	- como deveria ser
 	- qual padrão, convenção ou regra foi violado
-10. Crie um save point verificado por incremento, via commit pequeno e descritivo — coloque em stage apenas os arquivos que a task tocou mais a atualização de status dela; **nunca use `git add -A` às cegas**
-11. Quando a task terminar, marque-a como `DONE` em `/docs/tasks.md`; se houver bloqueio, marque `BLOCKED` com a causa e pare antes de seguir para a próxima
+11. Crie um save point verificado por incremento, via commit pequeno e descritivo — coloque em stage apenas os arquivos que a task tocou mais a atualização de status dela; **nunca use `git add -A` às cegas**
+12. Quando a task terminar, marque-a como `DONE` em `/docs/tasks.md`; se houver bloqueio, marque `BLOCKED` com a causa e pare antes de seguir para a próxima
 
 ## Autônomo: o plano inteiro (`/build auto`)
 
@@ -45,7 +59,7 @@ Use quando já existe uma spec e você quer colapsar plano + build em uma execu�
 2. **Estabeleça uma linha de base limpa.** Rode `git status --porcelain`. Se houver mudanças não commitadas fora dos artefatos de planejamento esperados (`/docs/spec.md`, `/docs/plan.md`, `/docs/tasks.md`, `/docs/handoff.md`, `/docs/lessons.md`, `SPEC.md`, `spec/*`), pare e peça ao usuário para commitar, guardar em stash ou confirmar como tratá-las. Commits autônomos por tarefa não podem absorver trabalho local não relacionado, ou a garantia de rollback limpo quebra.
 3. **Planeje se necessário.** Se não houver `/docs/plan.md`, invoque a skill `planning-and-task-breakdown` para gerar um.
 4. **Checkpoint único.** Apresente o plano completo e aguarde uma afirmativa inequívoca (ex.: "aprovo", "pode ir", "sim"). Trate respostas hesitantes ("parece razoável", "acho que sim") como **não** aprovadas. Este é o único gate humano — após a aprovação, execute autonomamente. Se você gerou `/docs/plan.md`, commite-o agora como um único commit preparatório, para que ele não vaze para o commit da primeira tarefa.
-5. **Execute todas as tarefas em ordem de dependência.** Use as dependências declaradas de cada tarefa; se não estiverem explícitas, execute na ordem em que o plano as lista. Para cada tarefa, rode o loop padrão completo acima (VERMELHO → VERDE → regressão → build → commit → marcar concluída), incluindo as atualizações de `/docs/tasks.md` e `/docs/handoff.md`. Um commit por tarefa, para que qualquer ponto seja um rollback limpo.
+5. **Execute todas as tarefas em ordem de dependência.** Use as dependências declaradas de cada tarefa; se não estiverem explícitas, execute na ordem em que o plano as lista. Para cada tarefa, rode o loop padrão completo acima (classificação e skill de domínio → VERMELHO → VERDE → regressão → build → commit → marcar concluída), incluindo as atualizações de `/docs/tasks.md` e `/docs/handoff.md`. Um commit por tarefa, para que qualquer ponto seja um rollback limpo.
 6. **Pare e pergunte ao usuário** (não force a passagem) quando:
    - um teste não puder passar ou a build quebrar sem correção óbvia → siga a skill `debugging-and-error-recovery`
    - a spec for ambígua, ou uma tarefa precisar de uma decisão que a spec não cobre
