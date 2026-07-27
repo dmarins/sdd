@@ -8,11 +8,12 @@ Invoque a skill `incremental-implementation` juntamente com a skill `test-driven
 
 Antes de implementar cada task, classifique-a explicitamente como **backend**, **frontend** ou **mista**, e invoque a skill de domínio correspondente como perfil complementar de execução:
 
-| Tipo de trabalho | Sinais na task | Skill de domínio |
-|---|---|---|
-| **Backend** | Go, Lambda, DynamoDB, API Gateway, Cognito, Terraform, filas, eventos, IAM | `go-aws-serverless-development` |
-| **Frontend** | Componentes React, páginas, layout, interação, estado de UI, acessibilidade, qualquer output visível no browser | `frontend-ui-engineering` (L007) |
-| **Mista** | Toca ambos os lados (ex.: novo endpoint + tela que o consome) | Ambas — aplique cada skill ao trecho do seu domínio |
+| Tipo de trabalho | Sinais na task | Skill de domínio | Persona (subagente) |
+|---|---|---|---|
+| **Backend** | Go, Lambda, DynamoDB, API Gateway, Cognito, Terraform, filas, eventos, IAM | `go-aws-serverless-development` | `serverless-backend` |
+| **Frontend** | Componentes React, páginas, layout, interação, estado de UI, acessibilidade, qualquer output visível no browser | `frontend-ui-engineering` (L007) | `frontend-react` |
+| **Mista** | Toca ambos os lados (ex.: novo endpoint + tela que o consome) | Ambas — aplique cada skill ao trecho do seu domínio | Uma persona por trecho de domínio |
+| **Geral** | Script utilitário, tooling, CI, doc, integração pontual | Apenas as skills base | Inline (ou `developer`, se exceder o limiar) |
 
 Regras da delegação:
 
@@ -20,6 +21,19 @@ Regras da delegação:
 - Declare a classificação no início da task (ex.: "Task 3 — frontend → `frontend-ui-engineering`"), para que a delegação fique visível e auditável no handoff.
 - Se a task não se encaixar em nenhum tipo (ex.: script utilitário, doc, CI), siga apenas com as skills base — não force uma skill de domínio que não se aplica.
 - Em caso de dúvida sobre a classificação, pare e pergunte antes de implementar — não adivinhe o domínio.
+
+## Delegação a subagente
+
+A classificação decide também **quem executa** a task. Este protocolo é compartilhado com a fase BUILD do `/workflow`:
+
+- **Execute inline** (você mesmo, com o loop padrão abaixo) quando a task for do tipo geral, ou quando tocar ≤2 arquivos com menos de ~50 linhas previstas — o custo de contexto de um subagente não se paga.
+- **Delegue à persona da tabela** nos demais casos, iniciando o subagente com um prompt que contenha:
+  - o bloco completo da task de `/docs/tasks.md` (critérios de aceitação incluídos)
+  - o trecho relevante do `## Contexto do código-base` de `/docs/plan.md`, se existir
+  - as lições `OPEN` relevantes de `/docs/lessons.md`
+  - a instrução de seguir `incremental-implementation` + `test-driven-development` (+ a skill de domínio da tabela), rodar testes e build, e **reportar** arquivos tocados + verificações executadas
+- **Regra do escritor único:** o subagente implementa e testa, mas **não commita e não edita `/docs`**. Você (agente principal) verifica o relatório de forma independente — rode a suíte completa e a build antes de aceitar —, atualiza `/docs/tasks.md`/`/docs/handoff.md` e faz o commit da task. Dois escritores no stage do git ou em `/docs` quebram a garantia de rollback limpo por task.
+- Se o relatório do subagente divergir do que a verificação independente encontrar, trate como task `BLOCKED`: registre a divergência no handoff e siga `debugging-and-error-recovery` — não commite por cima.
 
 ## Modos
 
@@ -35,7 +49,7 @@ Antes de implementar, leia `/docs/plan.md`, `/docs/tasks.md`, `/docs/handoff.md`
 Selecione a task `IN_PROGRESS` existente ou a próxima task `TODO`. Para cada task:
 
 1. Se a task ainda estiver em `TODO`, marque-a como `IN_PROGRESS` em `/docs/tasks.md`
-2. Classifique a task (backend, frontend ou mista) conforme a seção **Delegação por tipo de trabalho** e invoque a skill de domínio correspondente
+2. Classifique a task (backend, frontend, mista ou geral) conforme a seção **Delegação por tipo de trabalho** e decida a execução conforme **Delegação a subagente** — inline com a skill de domínio, ou delegada à persona correspondente
 3. Atualize `/docs/handoff.md` com objetivo atual, classificação da task e skill de domínio aplicada, critérios de aceitação ativos, arquivos esperados, lições abertas relevantes e próximo passo planejado
 4. Carregue o contexto relevante (código existente, padrões, tipos)
 5. Escreva um teste que falhe para o comportamento esperado (VERMELHO)

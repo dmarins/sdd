@@ -24,6 +24,29 @@ Cada tarefa deve conter, no mínimo:
 - verificações obrigatórias
 - checkpoint seguinte ou próximo passo esperado
 
+## Contrato de `/docs/plan.md` (marker de aprovação)
+
+Quando o plano é gerado pelo `/workflow` (ou pelo `/plan` dentro dele), a primeira linha após o título carrega o marker de aprovação:
+
+```markdown
+> Status: DRAFT
+```
+
+ou, após o gate humano:
+
+```markdown
+> Status: APPROVED (AAAA-MM-DD)
+```
+
+- `DRAFT` — o plano existe mas não foi aprovado; o `/workflow` reapresenta e pede aprovação antes de qualquer código.
+- `APPROVED` — o gate foi cumprido; a fase BUILD pode executar. A transição `DRAFT → APPROVED` é o equivalente persistente do arquivo de plano corrente de sistemas de pipeline por arquivo — sobrevive a queda de sessão.
+
+O plano gerado pelo `/workflow` também contém as seções `## Roteamento` (decisão de especialista confirmada pelo usuário) e `## Contexto do código-base` (relatório do `codebase-analyst`).
+
+## Arquivamento (`/docs/archive/`)
+
+Ao encerrar um pipeline `/workflow`, `spec.md`, `plan.md` e `tasks.md` são movidos para `/docs/archive/AAAA-MM-DD-<slug-da-feature>/`. Sem o arquivamento, a spec antiga faria a próxima execução pular a fase DEFINE. `handoff.md` é resetado; `lessons.md` nunca é arquivado — é acumulativo.
+
 ## Contrato de `/docs/handoff.md`
 
 O handoff deve ser curto e operacional. Atualize sempre que uma task mudar de estado ou um incremento verificável terminar.
@@ -36,9 +59,13 @@ Estrutura mínima recomendada:
 ## Escopo atual
 - Feature ou correção em andamento
 
+## Fase do workflow
+- BUILD (ou DEFINE, ROUTE, ANALYZE, PLAN, GATE, REVIEW ciclo 1/2, REVIEW_DONE, DOCUMENT — apenas quando dirigido pelo /workflow)
+
 ## Task ativa
 - ID: T-03
 - Status: IN_PROGRESS
+- Execução: delegada a `serverless-backend` (ou inline)
 
 ## Último incremento verificado
 - Testes executados
