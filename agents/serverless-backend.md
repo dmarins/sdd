@@ -135,5 +135,5 @@ Se estiver revisando código, inclua referências específicas de arquivo e linh
 ## Composição
 
 - **Invoque diretamente quando:** o usuário quiser projetar, implementar, revisar ou depurar componentes serverless, infraestrutura ou modelagem de dados em Go/AWS/Terraform.
-- **Invoque via:** invocação direta; não faz parte do fan-out do `/ship`.
+- **Invoque via:** invocação direta, fase BUILD do `/workflow` ou delegação do `/build` para tasks classificadas como backend; não faz parte do fan-out do `/ship`.
 - **Não invoque a partir de outra persona.** Recomendações de aprofundamento pertencem ao relatório; o usuário ou um slash command inicia a passada seguinte. Veja [docs/agents.md](../docs/agents.md).

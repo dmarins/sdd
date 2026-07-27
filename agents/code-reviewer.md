@@ -93,5 +93,5 @@ Categorize cada achado assim:
 ## Composição
 
 - **Invoque diretamente quando:** o usuário pedir a revisão de uma mudança, arquivo ou PR específico.
-- **Invoque via:** `/review` (revisão de perspectiva única) ou `/ship` (fan-out paralelo ao lado de `security-auditor` e `test-engineer`).
+- **Invoque via:** `/review` (revisão de perspectiva única), fase REVIEW do `/workflow` (revisão do diff acumulado do pipeline) ou `/ship` (fan-out paralelo ao lado de `security-auditor` e `test-engineer`).
 - **Não invoque a partir de outra persona.** Se você se pegar querendo delegar ao `security-auditor` ou ao `test-engineer`, apresente isso como recomendação no seu relatório — orquestração pertence aos slash commands, não às personas. Veja [docs/agents.md](../docs/agents.md).
