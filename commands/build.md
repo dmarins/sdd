@@ -1,5 +1,5 @@
 ---
-description: Implemente a próxima tarefa incrementalmente — compile, teste, verifique e confirme
+description: Implemente tarefas incrementalmente — compile, teste, verifique e confirme. Adicione "auto" para executar o plano inteiro em um único passe aprovado.
 ---
 
 Invoque a skill `incremental-implementation` juntamente com a skill `test-driven-development`.
@@ -8,7 +8,14 @@ Se a tarefa estiver claramente no contexto de projetos Go com AWS e Terraform, i
 
 Se a tarefa tocar componentes React, páginas, layout, interação ou qualquer output visível no browser, invoque também a skill `frontend-ui-engineering` como perfil complementar de execução. (L007)
 
-Para tarefas de frontend com protótipo disponível (ex.: Google Stitch), consulte as telas-alvo via `mcp__stitch__*` antes de iniciar (passo 3) e ao finalizar (passo 8) para validar fidelidade ao design. (L008)
+## Modos
+
+- **`/build`** — implemente a *próxima* tarefa pendente, depois pare (cuidadoso, uma fatia por vez).
+- **`/build auto`** — gere o plano se necessário, obtenha uma única aprovação e implemente *todas* as tarefas sem parar entre elas.
+
+`$ARGUMENTS` seleciona o modo. Trate `auto` (canônico) ou `all` como modo autônomo; qualquer outra coisa (ou vazio) é o modo padrão de tarefa única. Nota: o modo autônomo não é mais rápido *por tarefa* — ele roda o mesmo loop guiado por testes — apenas remove o humano entre as tarefas.
+
+## Padrão: uma tarefa
 
 Antes de implementar, leia `/docs/plan.md`, `/docs/tasks.md`, `/docs/handoff.md`, `/docs/lessons.md` e verifique o estado atual do Git.
 
@@ -27,7 +34,24 @@ Selecione a task `IN_PROGRESS` existente ou a próxima task `TODO`. Para cada ta
 	- o que foi feito de forma errada
 	- como deveria ser
 	- qual padrão, convenção ou regra foi violado
-10. Crie um save point verificado por incremento, preferencialmente via commit pequeno e descritivo
+10. Crie um save point verificado por incremento, via commit pequeno e descritivo — coloque em stage apenas os arquivos que a task tocou mais a atualização de status dela; **nunca use `git add -A` às cegas**
 11. Quando a task terminar, marque-a como `DONE` em `/docs/tasks.md`; se houver bloqueio, marque `BLOCKED` com a causa e pare antes de seguir para a próxima
+
+## Autônomo: o plano inteiro (`/build auto`)
+
+Use quando já existe uma spec e você quer colapsar plano + build em uma execução. Isso remove o passo manual entre as tarefas — **não** a verificação. Toda tarefa continua ganhando um teste que passa e o próprio commit.
+
+1. **Exija uma spec.** Procure uma spec apenas em caminhos conhecidos: `/docs/spec.md` (convenção local), `SPEC.md` na raiz do repositório ou um arquivo sob `spec/`. Um README ou doc arbitrário **não** conta. Se nenhuma existir, pare e diga ao usuário para rodar `/spec` primeiro — não invente requisitos.
+2. **Estabeleça uma linha de base limpa.** Rode `git status --porcelain`. Se houver mudanças não commitadas fora dos artefatos de planejamento esperados (`/docs/spec.md`, `/docs/plan.md`, `/docs/tasks.md`, `/docs/handoff.md`, `/docs/lessons.md`, `SPEC.md`, `spec/*`), pare e peça ao usuário para commitar, guardar em stash ou confirmar como tratá-las. Commits autônomos por tarefa não podem absorver trabalho local não relacionado, ou a garantia de rollback limpo quebra.
+3. **Planeje se necessário.** Se não houver `/docs/plan.md`, invoque a skill `planning-and-task-breakdown` para gerar um.
+4. **Checkpoint único.** Apresente o plano completo e aguarde uma afirmativa inequívoca (ex.: "aprovo", "pode ir", "sim"). Trate respostas hesitantes ("parece razoável", "acho que sim") como **não** aprovadas. Este é o único gate humano — após a aprovação, execute autonomamente. Se você gerou `/docs/plan.md`, commite-o agora como um único commit preparatório, para que ele não vaze para o commit da primeira tarefa.
+5. **Execute todas as tarefas em ordem de dependência.** Use as dependências declaradas de cada tarefa; se não estiverem explícitas, execute na ordem em que o plano as lista. Para cada tarefa, rode o loop padrão completo acima (VERMELHO → VERDE → regressão → build → commit → marcar concluída), incluindo as atualizações de `/docs/tasks.md` e `/docs/handoff.md`. Um commit por tarefa, para que qualquer ponto seja um rollback limpo.
+6. **Pare e pergunte ao usuário** (não force a passagem) quando:
+   - um teste não puder passar ou a build quebrar sem correção óbvia → siga a skill `debugging-and-error-recovery`
+   - a spec for ambígua, ou uma tarefa precisar de uma decisão que a spec não cobre
+   - uma tarefa for de alto risco ou irreversível — mudanças de auth/permissão, migrações destrutivas de dados, pagamentos, deleções, deploys, qualquer coisa tocando segredos, **ou qualquer coisa que você não consiga desfazer com `git revert`** → siga a skill `doubt-driven-development` e obtenha aprovação explícita antes de continuar
+
+   Depois que o usuário resolver um blocker, ele reinvoca `/build auto` — a execução retoma da próxima tarefa pendente.
+7. **Resuma ao final:** tarefas concluídas, testes adicionados, commits feitos e qualquer coisa pulada, sinalizada ou deixada para o usuário.
 
 Se alguma etapa falhar, siga a skill `debugging-and-error-recovery`.
