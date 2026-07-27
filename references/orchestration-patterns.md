@@ -110,7 +110,38 @@ agente principal → subagente de pesquisa (lê 50 arquivos) → resumo → agen
 
 **Custo:** um contexto isolado de subagente. Vale a pena sempre que a alternativa é carregar centenas de arquivos no contexto principal.
 
-**No Claude Code, use o subagente embutido `Explore`** em vez de definir uma persona de pesquisa customizada. O `Explore` roda em Haiku, tem ferramentas de escrita/edição negadas e foi construído para este padrão. Defina um subagente de pesquisa customizado apenas quando o `Explore` não servir (ex.: você precisa de um system prompt específico de domínio que o modelo não inferiria).
+**No Claude Code, use o subagente embutido `Explore`** em vez de definir uma persona de pesquisa customizada. O `Explore` roda em Haiku, tem ferramentas de escrita/edição negadas e foi construído para este padrão. Defina um subagente de pesquisa customizado apenas quando o `Explore` não servir (ex.: você precisa de um system prompt específico de domínio que o modelo não inferiria). A exceção local é o `codebase-analyst`: uma persona de pesquisa customizada que existe porque a fase ANALYZE do `/workflow` exige um formato de relatório fixo que alimenta o plano.
+
+---
+
+### 6. Pipeline orquestrado por comando (gates humanos + estado em arquivo)
+
+Um slash command que o **agente principal** executa de ponta a ponta, encadeando fases com subagentes onde há valor de isolamento e parando nos checkpoints humanos. O estado vive em `/docs/*.md`, não na memória da sessão.
+
+```
+/workflow → DEFINE → ROUTE(🖐) → ANALYZE(codebase-analyst) → PLAN → GATE(🖐)
+          → BUILD(serverless-backend | frontend-react | developer | inline, 🖐 por task)
+          → REVIEW(code-reviewer) → DOCUMENT → arquivar → recomenda /ship
+```
+
+**Use quando:** as subtarefas são dependentes (cada fase consome a saída da anterior), mas o hand-off pode fluir por artefato em `/docs` e os gates humanos podem ficar no agente principal.
+
+**Exemplos neste repositório:** `/workflow`.
+
+**O que o mantém do lado certo do antipadrão C** — as quatro propriedades são obrigatórias:
+
+1. **O orquestrador é o agente principal**, nunca um subagente (regra da plataforma: subagentes não iniciam subagentes, nem conversam com o usuário).
+2. **Hand-offs por artefato, não por resumo:** cada fase lê e escreve `/docs/{spec,plan,tasks,handoff}.md`; nenhum resultado de subagente é parafraseado para outro subagente.
+3. **Checkpoints humanos preservados:** confirmação de roteamento, aprovação de plano (`> Status: DRAFT → APPROVED`), parada por task no modo padrão e stops de alto risco no modo `auto`.
+4. **Subagentes só onde há valor de isolamento:** pesquisa (`codebase-analyst`), implementação pesada (especialistas de domínio), perspectiva de review (`code-reviewer`). Tasks pequenas rodam inline; roteamento, planejamento e documentação nunca viram subagente.
+
+**Custo:** o mais alto do catálogo — um contexto de subagente por task delegada mais a verificação independente do agente principal (~2× tokens por task versus execução inline). O retorno é contexto principal limpo em pipelines longos e retomada por estado após queda de sessão. Para escopos pequenos, recue para o Padrão 4 (`/spec → /plan → /build` dirigidos por você) ou para `/build` direto.
+
+**Checklist de validação antes de adotar este padrão:**
+- [ ] O estado entre fases cabe em artefatos versionados (não exige memória de sessão)?
+- [ ] Todos os pontos onde julgamento humano importa têm gate explícito no agente principal?
+- [ ] Cada subagente do pipeline se justificaria sozinho pelos Padrões 3 ou 5?
+- [ ] Existe caminho rápido documentado para quem não precisa do pipeline inteiro?
 
 ---
 
@@ -327,6 +358,8 @@ Um agente que chama `/spec`, depois `/plan`, depois `/build`, etc. em nome do us
 
 **Faça em vez disso:** mantenha o usuário como orquestrador. Documente a sequência recomendada no `README.md` e deixe os usuários invocá-la.
 
+**Diferença para o Padrão 6:** o `/workflow` parece este antipadrão de longe, mas nega cada modo de falha ponto a ponto — os checkpoints humanos permanecem (roteamento, aprovação de plano, stops de alto risco); os hand-offs fluem por artefato em `/docs`, não por resumo, então não há deriva acumulada de paráfrase; e o orquestrador é o próprio agente principal, não um turno extra de subagente por passo. Se um pipeline proposto não sustentar as quatro propriedades obrigatórias do Padrão 6, ele é este antipadrão.
+
 ---
 
 ### D. Árvores profundas de personas
@@ -352,7 +385,10 @@ O trabalho é uma perspectiva sobre um artefato?
 └── Não → A mesma composição vai se repetir?
          ├── Não → Invocação direta, ad hoc. Pare.
          └── Sim → As subtarefas são independentes?
-                  ├── Não → Slash commands sequenciais rodados pelo usuário (Padrão 4).
+                  ├── Não → O estado flui por arquivo e os gates humanos ficam no agente principal?
+                  │        ├── Sim → Pipeline orquestrado por comando (Padrão 6, ex.: /workflow).
+                  │        │        Valide contra as quatro propriedades obrigatórias.
+                  │        └── Não → Slash commands sequenciais rodados pelo usuário (Padrão 4).
                   └── Sim → Fan-out paralelo com merge (Padrão 3).
                            Valide contra a checklist acima.
                            Se qualquer checagem falhar → recue para comando de persona única (Padrão 2).

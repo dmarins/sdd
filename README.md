@@ -51,10 +51,14 @@ DEFINE        PLAN          BUILD         VERIFY        REVIEW        SHIP
 /spec   →    /plan   →    /build   →    /test    →    /review  →    /ship
 					↘
 					 /resume
+
+/workflow = o pipeline inteiro num comando só, com roteamento a especialistas
+            e gates de aprovação (você continua decidindo nos checkpoints)
 ```
 
 | Comando | Quando usar |
 |---|---|
+| `/workflow` | Feature completa de ponta a ponta — orquestra DEFINE → ROUTE → ANALYZE → PLAN → gate de aprovação → BUILD (especialistas por task) → REVIEW → DOCUMENT. `/workflow auto` não para entre tasks; os demais gates permanecem |
 | `/spec` | Antes de codar qualquer feature nova — define objetivo, estrutura, testes e limites |
 | `/plan` | Com a spec em mãos — quebra o trabalho em tasks com critérios de aceite |
 | `/build` | Implementa a próxima task (TDD embutido: RED → GREEN → commit; pode compor uma skill de perfil por stack). `/build auto` executa o plano inteiro após um único checkpoint de aprovação |
@@ -74,7 +78,9 @@ DEFINE        PLAN          BUILD         VERIFY        REVIEW        SHIP
 
 ### 1. Nova feature do zero
 
-Use este caminho quando a feature ainda não tem spec nem plano:
+**Caminho de um comando:** rode `/workflow` e o pipeline inteiro executa com gates — ele pergunta o especialista (ROUTE), investiga o código-base (`codebase-analyst`), gera o plano, **para até você aprovar**, implementa task a task delegando a `serverless-backend`/`frontend-react`/`developer`, passa o diff pelo `code-reviewer` e documenta. Reinvocar `/workflow` após qualquer interrupção retoma da fase correta pelo estado em `/docs`.
+
+**Caminho manual** (você orquestra cada fase):
 
 1. Rode `/spec` para definir objetivo, limites, testes e restrições.
 2. Rode `/plan` para quebrar a spec em tarefas pequenas e inicializar `/docs/spec.md`, `/docs/plan.md`, `/docs/tasks.md`, `/docs/handoff.md` e `/docs/lessons.md`.
@@ -163,6 +169,20 @@ O workflow passa a usar uma única área persistida para sobreviver a troca de s
 
 `/build` e `/review` podem gerar candidatos a lição. `/learn` registra a lição explicitamente em `/docs/lessons.md` e, quando ela for generalizável, promove a regra para o artefato certo. `/resume` usa esses artefatos para reconstruir o contexto e continuar com o menor retrabalho possível.
 
+Quando dirigido pelo `/workflow`, o `plan.md` carrega o marker de aprovação (`> Status: DRAFT|APPROVED`), o handoff registra a `## Fase do workflow`, e o encerramento arquiva spec/plan/tasks em `/docs/archive/`. Detalhes em `docs/workflow-state.md`.
+
+### Ajuste de rigor (equivalência com "quality levels")
+
+Este repositório não tem um knob `quality=pragmatic|balanced|strict` — o rigor de teste e verificação é invariante. O que varia é **quanto de julgamento humano entra entre os passos**:
+
+| Se você quer | Use |
+|---|---|
+| Mudança rápida e pequena, controle máximo | `/build` (uma task, para) |
+| Executar um plano inteiro com um único gate | `/build auto` |
+| Pipeline completo com especialistas e gates | `/workflow` |
+| Pipeline completo parando só em alto risco | `/workflow auto` |
+| Pular o fan-out do `/ship` | Permitido só para ≤2 arquivos, <50 linhas, sem tocar auth/pagamentos/dados/config |
+
 ---
 
 ## Loop de Aprendizado
@@ -229,6 +249,7 @@ Se já existe uma spec informal ou tarefas planejadas:
 | `code-simplification` | Reduzir complexidade sem mudar comportamento |
 | `security-and-hardening` | OWASP Top 10, auth, segredos, dependências |
 | `performance-optimization` | Core Web Vitals, profiling, bundle, anti-patterns |
+| `pr-review-comments` | Processar comentários de revisão de PR criticamente e com segurança |
 
 ### Ship
 | Skill | Uso |
@@ -258,6 +279,9 @@ Invocados explicitamente quando você quer uma perspectiva mais focada:
 | `security-auditor` | Auditoria de segurança, modelagem de ameaças (inclui funcionalidades de IA/LLM) |
 | `web-performance-auditor` | Auditoria de Core Web Vitals e antipadrões de performance em web apps |
 | `serverless-backend` | Especialista em Go + AWS + Terraform para componentes serverless |
+| `frontend-react` | Especialista em React 18 + TypeScript + Vite + TanStack Query para UI |
+| `codebase-analyst` | Levantamento read-only do código-base antes de planejar (fase ANALYZE do `/workflow`) |
+| `developer` | Fallback generalista para tasks fora dos domínios especializados |
 
 ```
 use code-reviewer to review my last commit

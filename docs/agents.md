@@ -9,6 +9,9 @@ Personas especialistas que exercem um único papel com uma única perspectiva. C
 | [test-engineer](../agents/test-engineer.md) | Engenheiro de QA | Estratégia de testes, análise de cobertura, padrão Prove-It |
 | [web-performance-auditor](../agents/web-performance-auditor.md) | Engenheiro de Web Performance | Auditoria de Core Web Vitals, análise de loading/rendering/rede |
 | [serverless-backend](../agents/serverless-backend.md) | Especialista Serverless AWS (local do fork) | Projetar, implementar e depurar componentes serverless em Go/AWS/Terraform |
+| [frontend-react](../agents/frontend-react.md) | Especialista Frontend React (local do fork) | Projetar, implementar e depurar componentes, páginas e estado de UI em React 18/TypeScript |
+| [codebase-analyst](../agents/codebase-analyst.md) | Investigador de código-base (local do fork) | Levantamento read-only de stack, convenções e pontos de integração antes de planejar |
+| [developer](../agents/developer.md) | Engenheiro generalista (local do fork) | Fallback de implementação para tasks fora dos domínios especializados |
 
 ## Como personas se relacionam com skills e comandos
 
@@ -44,7 +47,14 @@ Escolha apenas quando investigações **independentes** podem rodar em paralelo 
 
 - `/ship` → faz fan-out para `code-reviewer` + `security-auditor` + `test-engineer` em paralelo, depois sintetiza os relatórios em uma decisão go/no-go
 
-Este é o único padrão de orquestração que este repositório endossa. Veja [references/orchestration-patterns.md](../references/orchestration-patterns.md) para o catálogo completo de padrões e antipadrões.
+### Slash command (orquestrador — pipeline)
+Escolha quando as fases são **dependentes** (cada uma consome a saída da anterior), mas o estado pode fluir por artefato em `/docs` e os gates humanos ficam no agente principal.
+
+- `/workflow` → o agente principal encadeia DEFINE → ROUTE → ANALYZE (`codebase-analyst`) → PLAN → gate de aprovação → BUILD (especialistas de domínio por task) → REVIEW (`code-reviewer`) → DOCUMENT, parando nos checkpoints humanos
+
+**Por que isso não é o antipadrão meta-orchestrator:** o `/workflow` não parafraseia resultados entre subagentes (o estado vive em `/docs/*.md`), não remove gates (confirmação de roteamento, aprovação de plano, stops de alto risco) e roteia por tabela determinística confirmada pelo usuário — não por uma persona-camada que "decide quem chamar". Compare com o exemplo inválido mais abaixo.
+
+Esses são os dois padrões de orquestração que este repositório endossa. Veja [references/orchestration-patterns.md](../references/orchestration-patterns.md) para o catálogo completo de padrões e antipadrões.
 
 ## Matriz de decisão
 
@@ -53,7 +63,9 @@ O trabalho é uma perspectiva sobre um artefato?
 ├── Sim → Invocação direta de persona
 └── Não → As subtarefas são independentes (sem estado mutável compartilhado, sem ordem)?
          ├── Sim → Slash command com fan-out paralelo (ex.: /ship)
-         └── Não → Slash commands sequenciais rodados pelo usuário (/spec → /plan → /build → /test → /review)
+         └── Não → O estado flui por arquivo e os gates humanos ficam no agente principal?
+                  ├── Sim → Pipeline orquestrado por comando (/workflow)
+                  └── Não → Slash commands sequenciais rodados pelo usuário (/spec → /plan → /build → /test → /review)
 ```
 
 ## Exemplo trabalhado: orquestração válida
