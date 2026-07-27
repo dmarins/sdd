@@ -60,7 +60,7 @@ Estrutura mínima recomendada:
 - Feature ou correção em andamento
 
 ## Fase do workflow
-- BUILD (ou DEFINE, ROUTE, ANALYZE, PLAN, GATE, REVIEW ciclo 1/2, REVIEW_DONE, DOCUMENT — apenas quando dirigido pelo /workflow)
+- BUILD (ou DEFINE, ROUTE, ANALYZE, PLAN, GATE, REVIEW ciclo 1/3, REVIEW_DONE, DOCUMENT — apenas quando dirigido pelo /workflow)
 
 ## Task ativa
 - ID: T-03

@@ -72,7 +72,7 @@ Para cada task, em ordem de dependência, siga o protocolo da seção **Delegaç
 
 1. Inicie o subagente `code-reviewer` sobre o diff acumulado do pipeline (do commit preparatório ao HEAD), pedindo o relatório em Critical/Important/Sugestão.
 2. Achados `Critical` ou `Important` → crie fix-tasks em `/docs/tasks.md` (classificadas como qualquer outra task) e **volte à fase BUILD**.
-3. Máximo de **2 ciclos** review→fix. Se o terceiro review ainda tiver achados Critical/Important, pare e devolva a decisão ao usuário.
+3. Máximo de **3 ciclos** review→fix. Se o quarto review ainda tiver achados Critical/Important, pare e devolva a decisão ao usuário.
 4. Review limpo (ou só Sugestões): registre `REVIEW_DONE` na seção `## Fase do workflow` do handoff.
 
 ## Fase DOCUMENT

@@ -83,7 +83,7 @@ DEFINE        PLAN          BUILD         VERIFY        REVIEW        SHIP
 Três garantias do pipeline que valem destacar:
 
 - **Escritor único:** o especialista implementa e testa, mas quem verifica de forma independente (suíte completa + build), atualiza `/docs` e commita é o agente principal — um commit por task, rollback limpo garantido.
-- **Review retroalimenta o build:** achados `Critical`/`Important` do `code-reviewer` viram fix-tasks e voltam à fase BUILD, com teto de 2 ciclos; persistindo achados, a decisão volta para você.
+- **Review retroalimenta o build:** achados `Critical`/`Important` do `code-reviewer` viram fix-tasks e voltam à fase BUILD, com teto de 3 ciclos; persistindo achados, a decisão volta para você.
 - **`/ship` nunca roda sozinho:** ao final, o `/workflow` arquiva os artefatos e apenas *recomenda* o `/ship` — o GO/NO-GO de produção continua seu.
 
 **Caminho manual** (você orquestra cada fase):
