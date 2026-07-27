@@ -1,6 +1,6 @@
 ---
 name: idea-refine
-description: Refina ideias iterativamente. Refine ideias por meio de pensamento divergente e convergente estruturado. Use "idea-refine" ou "ideate" para acionar.
+description: Refina ideias brutas em conceitos nítidos e acionáveis por meio de pensamento divergente e convergente estruturado. Use quando uma ideia ainda estiver vaga, quando precisar testar premissas antes de se comprometer com um plano ou quando quiser expandir opções antes de convergir para uma. Aciona com "ideate", "refine esta ideia" ou "teste meu plano".
 ---
 
 # Refinamento de Ideias

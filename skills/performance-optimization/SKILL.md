@@ -276,6 +276,41 @@ resource "aws_cloudwatch_metric_alarm" "orders_api_p95" {
 }
 ```
 
+### Etapa 4: Verificar (Manter ou Reverter)
+
+Uma correção é uma hipótese até você medir de novo. Esta etapa decide se ela sobrevive.
+
+**Meça de novo do mesmo jeito que mediu a linha de base:** mesmo comando, mesmas condições, mesmo orçamento fixo (tempo de relógio, contagem de amostras ou de requisições). Uma linha de base tirada com cache frio contra um resultado com cache quente mede o cache, não a sua mudança.
+
+**Mude uma coisa por vez.** Três otimizações entregues juntas produzem um número só, e você não consegue atribuí-lo. Se precisarem subir juntas, meça cada uma em isolamento primeiro.
+
+**Vença o ruído, não só a média.** Repita a medição e compare o delta com a variância entre execuções. Um ganho de 3% dentro de ±5% de variância não é ganho; é outra amostra.
+
+Então decida, estritamente:
+
+| Resultado vs. linha de base | Ação |
+|---|---|
+| Passou do limiar, testes verdes | **Manter.** Commite com os números de antes/depois na mensagem. |
+| Dentro do ruído (sem mudança mensurável) | **Reverter.** |
+| Pior | **Reverter.** |
+| Melhorou, mas um teste ficou vermelho | **Reverter.** Uma regressão vestida de vitória. |
+
+**"Neutro" é um revert, não um keep.** Esta é a etapa que os times pulam: a mudança já está escrita, jogá-la fora parece desperdício, então ela entra sem medição, e o código-base acumula complexidade que nunca comprou nada. Código que você mantém, você mantém para sempre. Faça-o pagar por si.
+
+**A correção condiciona a métrica.** A suíte permanece verde *e* o número se move. Uma "otimização" que vence descartando trabalho de que o produto precisava (pular uma validação, cachear algo que precisa estar fresco, remover uma espera que segurava a estrutura) é uma regressão, não uma vitória.
+
+#### Registre toda tentativa, inclusive as revertidas
+
+Trabalho revertido não deixa rastro no histórico do git, e é exatamente por isso que a mesma ideia morta é tentada de novo no trimestre seguinte. Mantenha um livro-razão curto para que uma ideia descartada continue descartada:
+
+| Ideia | Linha de base → Resultado | Veredito | Por quê |
+|---|---|---|---|
+| Cachear o item quente no handler | p99 240ms → 235ms | revertida | Dentro do ruído (±15ms). A query não era o gargalo. |
+| Trocar Scan por Query com GSI | p99 240ms → 90ms | mantida | Leituras sem índice sumiram do trace. |
+| Aumentar memória da Lambda para 1024MB | cold start 800ms → 790ms | revertida | Gargalo era o init do SDK, não CPU. |
+
+Uma seção na descrição do PR ou um `PERF.md` no repositório funcionam. O que importa é que a próxima pessoa (ou o próximo agente) leia antes de propor um experimento, e não repita um que já falhou.
+
 ## Orcamento de Performance
 
 Defina budgets e cobre-os em revisão e CI:

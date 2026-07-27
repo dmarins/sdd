@@ -17,6 +17,28 @@ Desenvolva com segurança em primeiro lugar. Em backends serverless com Go, AWS 
 - Ao integrar com APIs, filas, webhooks ou servicos externos
 - Ao definir IAM, KMS, Secrets Manager, Parameter Store ou politicas de rede
 - Ao criar uploads, callbacks, funcoes assicronas ou jobs
+- Ao adicionar funcionalidades que chamam um LLM (chatbots, sumarizadores, agentes, RAG)
+
+## Processo: Threat Model Primeiro
+
+Controles aparafusados sem um modelo de ameaças são chutes. Antes de endurecer, gaste cinco minutos pensando como um atacante:
+
+1. **Mapeie as fronteiras de confiança.** Onde dados não confiáveis cruzam para dentro do sistema? Requisições HTTP, campos de formulário, uploads de arquivo, webhooks, APIs de terceiros, filas de mensagem e **saída de LLM**. Toda fronteira é superfície de ataque.
+2. **Nomeie os ativos.** O que vale roubar ou quebrar? Credenciais, PII, dados de pagamento, ações administrativas, movimentação de dinheiro.
+3. **Rode STRIDE sobre cada fronteira** — uma lente rápida, não uma cerimônia:
+
+| Ameaça | Pergunte | Mitigação típica |
+|---|---|---|
+| **S**poofing | Alguém pode se passar por um usuário/serviço? | Autenticação, verificação de assinatura |
+| **T**ampering | Dados podem ser alterados em trânsito ou em repouso? | Checagens de integridade, queries parametrizadas, HTTPS |
+| **R**epudiation | Uma ação pode ser negada depois? | Log de auditoria de eventos de segurança |
+| **I**nformation disclosure | Dados podem vazar? | Criptografia, allowlist de campos, erros genéricos |
+| **D**enial of service | Pode ser sobrecarregado? | Rate limiting, limites de tamanho de entrada, timeouts |
+| **E**levation of privilege | Um usuário pode ganhar direitos indevidos? | Checagens de autorização, menor privilégio |
+
+4. **Escreva casos de abuso ao lado dos casos de uso.** Para cada funcionalidade, pergunte "como eu abusaria disto?" — e faça disso o seu primeiro teste.
+
+Se você não consegue nomear as fronteiras de confiança de uma funcionalidade, não está pronto para protegê-la. Isto é o OWASP **A04: Insecure Design** — a maioria das brechas começa no design, não no código.
 
 ## O Sistema de Limites em Tres Niveis
 
@@ -154,6 +176,20 @@ Infraestrutura segura deve ser declarada, revisavel e automatizada.
 - Rode `terraform validate` e um scanner como `tfsec` ou `checkov` quando disponivel
 - Documente toda excecao de risco e defina data de revisão
 
+### 7. Cross-Site Scripting (XSS) no Frontend
+
+```tsx
+// RUIM: renderizar entrada do usuário como HTML
+element.innerHTML = userInput;
+
+// BOM: usar o auto-escaping do framework (o React faz por padrão)
+return <div>{userInput}</div>;
+
+// Se você PRECISA renderizar HTML, sanitize antes
+import DOMPurify from 'dompurify';
+const clean = DOMPurify.sanitize(userInput);
+```
+
 ## Padroes de Validacao de Entrada
 
 ### Validacao na Fronteira do Sistema
@@ -195,6 +231,70 @@ func verifyWebhookSignature(body []byte, signature string, secret string) error 
 
 Não processe webhook sem autenticidade, idempotencia e trilha de auditoria.
 
+### Upload de Arquivos Seguro
+
+```go
+var allowedTypes = map[string]bool{
+	"image/jpeg": true,
+	"image/png":  true,
+	"image/webp": true,
+}
+
+const maxSize = 5 << 20 // 5MB
+
+func validateUpload(contentType string, size int64, head []byte) error {
+	if !allowedTypes[contentType] {
+		return ErrFileTypeNotAllowed
+	}
+	if size > maxSize {
+		return ErrFileTooLarge
+	}
+	// Não confie na extensão nem no Content-Type declarado —
+	// confira os magic bytes com http.DetectContentType(head) quando for crítico
+	return nil
+}
+```
+
+## Triagem de Resultados de Auditoria de Dependências
+
+Auditorias de gerenciador de pacotes (`govulncheck`, `npm audit`) reportam advisories conhecidos; elas não provam que um pacote é confiável nem que o código vulnerável é alcançável. Use esta árvore de decisão:
+
+```
+A auditoria nativa reporta uma vulnerabilidade
+├── Severidade: crítica ou alta
+│   ├── O código vulnerável é alcançável em runtime, build, teste ou deploy?
+│   │   ├── SIM --> Corrija imediatamente (atualize, aplique patch ou substitua a dependência)
+│   │   └── NÃO (confirmado sem uso nesses caminhos) --> Corrija em breve, mas não é blocker
+│   └── Existe correção disponível?
+│       ├── SIM --> Atualize para a versão corrigida
+│       └── NÃO --> Busque workarounds, considere substituir a dependência, ou registre exceção com data de revisão
+├── Severidade: moderada
+│   ├── Alcançável em produção? --> Corrija no próximo ciclo de release
+│   └── Só em dev? --> Corrija quando conveniente, acompanhe no backlog
+└── Severidade: baixa
+    └── Acompanhe e corrija nas atualizações regulares de dependências
+```
+
+**Perguntas-chave:**
+- A função vulnerável é de fato chamada no seu caminho de código? (o `govulncheck` já responde isso para Go)
+- A dependência é de runtime ou só de desenvolvimento?
+- A vulnerabilidade é explorável no seu contexto de deploy (ex.: vulnerabilidade server-side em um app client-only)?
+
+Quando adiar uma correção, documente a razão e defina uma data de revisão.
+
+### Higiene de Supply Chain
+
+Não presuma o gerenciador nem trate o manifesto mais próximo como raiz de instalação. Aplique esta ordem:
+
+1. **Encontre a fronteira de instalação e o gerenciador.** Use a raiz do workspace dona do lockfile, ou um projeto aninhado independente apenas quando estiver fora desse workspace. Ali, corrobore `packageManager` (quando presente), o lockfile e a CI; pare em caso de desacordo ou lockfiles concorrentes. Fixe a versão do gerenciador. Em Go, a fronteira é o `go.mod` + `go.sum` do módulo.
+2. **Bloqueie scripts de dependência antes da primeira execução.** Em ecossistemas com install scripts (npm), faça o bootstrap com scripts desabilitados ou uma política fail-closed documentada, inspecione a fonte dos scripts pendentes, aprove apenas o mínimo necessário, commite a política e então verifique com uma instalação limpa frozen/imutável. Nunca aprove scripts em bloco. (Go não executa scripts de instalação — uma razão a mais para preferir a stdlib.)
+
+Auditorias só encontram advisories conhecidos; não capturam um pacote recém-malicioso ou typosquatted. Portanto:
+
+- **Nunca aplique remediação forçada de auditoria automaticamente** (`npm audit fix --force` ou equivalente). Pré-visualize a remediação, leia changelogs e teste cada upgrade resultante; correções forçadas podem cruzar os ranges declarados de dependência.
+- **Verifique assinaturas de registry e proveniência onde houver suporte** (`npm audit signatures`) e trate a ausência como sinal para investigar, não como prova automática de comprometimento. Em Go, o `GOSUMDB` (sum database) já verifica a integridade dos módulos por padrão — não o desabilite.
+- **Revise juntos dependências novas, diffs de lockfile e mudanças de política de scripts** — propriedade, manutenção, idade da release, proveniência, grafo transitivo e typosquats como `cross-env` vs `crossenv` (OWASP **A06**, **LLM03**).
+
 ## Rate Limiting e Abuse Protection
 
 - Use **AWS WAF rate-based rules** para borda publica quando aplicavel
@@ -218,6 +318,37 @@ Preferencia de armazenamento:
 - Politicas IAM restringem leitura ao minimo necessário
 - CloudTrail e logs de acesso habilitados para recursos críticos
 
+## Protegendo Funcionalidades de IA / LLM
+
+Se a sua aplicação chama um LLM — chatbots, sumarizadores, agentes, RAG — ela herda uma nova superfície de ataque. Mapeie-a para o [OWASP Top 10 for LLM Applications (2025)](https://genai.owasp.org/llm-top-10/):
+
+- **Trate toda saída do modelo como entrada não confiável (LLM05: Improper Output Handling).** Nunca passe saída de LLM direto para `eval`, SQL, um shell, `innerHTML` ou um caminho de arquivo. Valide e codifique exatamente como faria com entrada crua de usuário.
+- **Assuma que prompts podem ser sequestrados (LLM01: Prompt Injection).** Texto não confiável na janela de contexto — uma mensagem de usuário, uma página web buscada, um PDF — pode carregar instruções. O system prompt não é uma fronteira de segurança; imponha permissões em código, não no prompt.
+- **Mantenha segredos e dados de outros usuários fora dos prompts (LLM02 / LLM07).** Qualquer coisa no contexto pode ser ecoada de volta. Não coloque API keys, dados cross-tenant ou o system prompt completo onde o modelo possa repeti-los.
+- **Restrinja permissões de ferramentas e agentes (LLM06: Excessive Agency).** Limite as ferramentas ao mínimo, exija confirmação para ações destrutivas ou irreversíveis e valide todo argumento de ferramenta.
+- **Limite o consumo (LLM10: Unbounded Consumption).** Estabeleça tetos de tokens, taxa de requisições e profundidade de loop/recursão para que uma entrada forjada não estoure o custo nem trave o sistema.
+- **Isole os dados de retrieval (LLM08: Vector and Embedding Weaknesses).** Em RAG, trate o vector store como fronteira de confiança: particione embeddings por tenant para que um usuário não recupere dados de outro, e valide documentos antes de indexar para que conteúdo envenenado não direcione as respostas.
+
+```go
+// RUIM: confiar na saída do modelo como comando
+sql, _ := llm.Generate(ctx, "Write SQL for: "+userQuestion)
+db.QueryContext(ctx, sql) // execução arbitrária de query
+
+// BOM: saída do modelo é dado — faça parse defensivo, valide e só então aja
+raw, err := llm.ReplyJSON(ctx, userMessage)
+if err != nil {
+	return err
+}
+var intent CommandIntent
+if err := json.Unmarshal([]byte(raw), &intent); err != nil {
+	return fmt.Errorf("unexpected model output: %w", err)
+}
+if err := intent.Validate(); err != nil {
+	return err
+}
+return runAllowlistedAction(ctx, intent.Action, intent.Params)
+```
+
 ## Checklist de Revisão de Segurança
 
 ```markdown
@@ -240,6 +371,16 @@ Preferencia de armazenamento:
 - [ ] Buckets, filas e topicos não estao públicos sem necessidade explicitada
 - [ ] Alarmes, CloudTrail e logs de auditoria estao configurados
 - [ ] Ferramentas de scan de dependência e IaC foram executadas
+
+### Supply Chain
+- [ ] Um lockfile autoritativo commitado (`go.sum`, lockfile do npm); a CI usa instalação frozen/imutável
+- [ ] Auditoria nativa triada por alcançabilidade e risco da correção; install scripts bloqueados salvo aprovação explícita
+- [ ] Dependências novas revisadas (propriedade, proveniência, idade da release, grafo transitivo)
+
+### IA / LLM (se usado)
+- [ ] Saída do modelo tratada como não confiável (sem eval/SQL/innerHTML/shell)
+- [ ] Segredos e dados de outros usuários mantidos fora dos prompts
+- [ ] Permissões de ferramentas/agentes restritas; ações destrutivas exigem confirmação
 ```
 
 ## Veja Tambem

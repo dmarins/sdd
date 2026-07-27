@@ -191,6 +191,33 @@ jobs:
 
 Use `OIDC` para autenticação com AWS sempre que possível. Evite credenciais estáticas em secrets quando o GitHub Actions pode assumir um role temporário.
 
+### Testes E2E
+
+Para frontends, rode os testes end-to-end em um job próprio, com o relatório publicado como artefato quando falhar:
+
+```yaml
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - run: npm ci
+      - name: Install Playwright
+        run: npx playwright install --with-deps chromium
+      - name: Build
+        run: npm run build
+      - name: Run E2E tests
+        run: npx playwright test
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+```
+
 ## Realimentando Falhas de CI para Agentes
 
 O valor de CI com agentes está no loop de feedback. Quando CI falha:

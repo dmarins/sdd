@@ -16,25 +16,30 @@ Quando uma tarefa chegar, identifique a fase do trabalho e aplique a skill corre
 ```
 Tarefa chega
     │
-    ├── Ideia vaga ou precisando refinamento? -> idea-refine
+    ├── Ainda não sabe o que quer? ----------> interview-me
+    ├── Conceito bruto, precisa de variantes? -> idea-refine
     ├── Novo projeto, feature ou mudança? ---> spec-driven-development
     ├── Já existe especificação e faltam tarefas? -> planning-and-task-breakdown
     ├── Implementando código? -----------------> incremental-implementation
     │   ├── UI? ------------------------------> frontend-ui-engineering
     │   ├── API? -----------------------------> api-and-interface-design
     │   ├── Falta contexto? ------------------> context-engineering
-    │   └── Precisa seguir docs oficiais? ----> source-driven-development
+    │   ├── Precisa seguir docs oficiais? ----> source-driven-development
+    │   └── Risco alto / código desconhecido? -> doubt-driven-development
     ├── Escrevendo ou rodando testes? -------> test-driven-development
     │   └── Há browser envolvido? -----------> browser-testing-with-devtools
     ├── Algo quebrou? -----------------------> debugging-and-error-recovery
     ├── Revisando código? -------------------> code-review-and-quality
+    │   ├── Complexo demais? ----------------> code-simplification
     │   ├── Risco de segurança? -------------> security-and-hardening
     │   └── Risco de performance? -----------> performance-optimization
     ├── Comentários de revisão abertos no PR? -> pr-review-comments
     ├── Commit, branch ou histórico? --------> git-workflow-and-versioning
     ├── Atualizando Go ou módulos Go? -------> go-runtime-and-dependency-upgrades
     ├── Pipeline e automação? ---------------> ci-cd-and-automation
+    ├── Deprecando ou migrando? -------------> deprecation-and-migration
     ├── Documentação ou ADR? ----------------> documentation-and-adrs
+    ├── Adicionando logs/métricas/alertas? --> observability-and-instrumentation
     └── Deploy ou release? ------------------> shipping-and-launch
 ```
 
@@ -110,6 +115,8 @@ Seu trabalho deve ser preciso, não uma reforma não solicitada.
 
 Toda skill tem uma etapa de verificação. Uma tarefa só está concluída quando a verificação passa. "Parece certo" não é evidência.
 
+A verificação por skill é a checagem local. A barra do projeto inteiro, que se aplica a *toda* mudança independentemente da skill ativa, é a Definition of Done: testes passam, sem regressões, comportamento verificado em runtime, docs atualizados. Veja `references/definition-of-done.md`. Ela complementa os critérios de aceitação de cada tarefa, sem substituí-los.
+
 ## Modos de Falha a Evitar
 
 Estes são erros que parecem produtividade, mas criam problema:
@@ -131,7 +138,7 @@ Estes são erros que parecem produtividade, mas criam problema:
 
 2. **Skills são fluxos, não sugestões.** Siga as etapas na ordem certa e não pule verificação.
 
-3. **Várias skills podem se aplicar.** Uma implementação pode passar por `idea-refine` -> `spec-driven-development` -> `planning-and-task-breakdown` -> `incremental-implementation` -> `test-driven-development` -> `code-review-and-quality` -> `shipping-and-launch`.
+3. **Várias skills podem se aplicar.** Uma implementação pode passar por `idea-refine` -> `spec-driven-development` -> `planning-and-task-breakdown` -> `incremental-implementation` -> `test-driven-development` -> `code-review-and-quality` -> `code-simplification` -> `shipping-and-launch`.
 
 4. **Na dúvida, comece por especificação.** Se a tarefa não é trivial e não há spec, comece com `spec-driven-development`.
 
@@ -140,17 +147,22 @@ Estes são erros que parecem produtividade, mas criam problema:
 Para uma feature completa, a sequência usual é:
 
 ```
-1. idea-refine                 -> refinar ideias vagas
-2. spec-driven-development     -> definir o que será construído
-3. planning-and-task-breakdown -> quebrar em tarefas verificáveis
-4. context-engineering         -> carregar o contexto certo
-5. source-driven-development   -> validar contra docs oficiais
-6. incremental-implementation  -> implementar em fatias
-7. test-driven-development     -> provar que funciona
-8. code-review-and-quality     -> revisar antes do merge
-9. git-workflow-and-versioning -> manter histórico limpo
-10. documentation-and-adrs     -> registrar decisões
-11. shipping-and-launch        -> liberar com segurança
+1.  interview-me                -> extrair o que o usuário realmente quer
+2.  idea-refine                 -> refinar ideias vagas
+3.  spec-driven-development     -> definir o que será construído
+4.  planning-and-task-breakdown -> quebrar em tarefas verificáveis
+5.  context-engineering         -> carregar o contexto certo
+6.  source-driven-development   -> validar contra docs oficiais
+7.  incremental-implementation  -> implementar em fatias
+8.  observability-and-instrumentation -> instrumentar enquanto constrói (roda em paralelo com 7-9, não depois)
+9.  doubt-driven-development    -> interrogar decisões não triviais em voo
+10. test-driven-development     -> provar que funciona
+11. code-review-and-quality     -> revisar antes do merge
+12. code-simplification         -> reduzir complexidade desnecessária preservando comportamento
+13. git-workflow-and-versioning -> manter histórico limpo
+14. documentation-and-adrs      -> registrar decisões
+15. deprecation-and-migration   -> aposentar sistemas antigos e migrar usuários com segurança quando preciso
+16. shipping-and-launch         -> liberar com segurança
 ```
 
 Nem toda tarefa usa todas as skills. Um bug fix pode precisar apenas de `debugging-and-error-recovery` -> `test-driven-development` -> `code-review-and-quality`.
@@ -161,11 +173,13 @@ Workflows de manutenção também podem fugir do lifecycle principal. Exemplo: u
 
 | Fase | Skill | Resumo em uma linha |
 |---|---|---|
+| Definir | interview-me | Expõe o que o usuário realmente quer antes de existir plano, spec ou código |
 | Definir | idea-refine | Refina ideias por pensamento divergente e convergente |
 | Definir | spec-driven-development | Define requisitos e critérios de aceitação antes do código |
 | Planejar | planning-and-task-breakdown | Decompõe em tarefas pequenas e verificáveis |
 | Construir | incremental-implementation | Implementa em fatias finas e testáveis |
 | Construir | source-driven-development | Verifica padrões nas docs oficiais |
+| Construir | doubt-driven-development | Revisão adversarial de contexto limpo em toda decisão não trivial |
 | Construir | context-engineering | Carrega o contexto certo no momento certo |
 | Construir | frontend-ui-engineering | Orienta UI de qualidade de produção |
 | Construir | api-and-interface-design | Define contratos claros e estáveis |
@@ -173,11 +187,14 @@ Workflows de manutenção também podem fugir do lifecycle principal. Exemplo: u
 | Verificar | browser-testing-with-devtools | Usa DevTools para verificação runtime em browser |
 | Verificar | debugging-and-error-recovery | Reproduz, localiza, corrige e protege |
 | Revisar | code-review-and-quality | Faz revisão com critérios de qualidade |
+| Revisar | code-simplification | Preserva comportamento enquanto reduz complexidade desnecessária |
 | Revisar | pr-review-comments | Processa comentários de revisão de PR com análise crítica e gates de confirmação |
 | Revisar | security-and-hardening | Aplica OWASP, IAM, segredos e menor privilégio |
 | Revisar | performance-optimization | Mede primeiro e otimiza o que realmente importa |
 | Manter | go-runtime-and-dependency-upgrades | Atualiza runtime Go e módulos com validação, CI e rollback |
 | Entregar | git-workflow-and-versioning | Mantém commits atômicos e histórico limpo |
 | Entregar | ci-cd-and-automation | Automatiza gates de qualidade |
+| Entregar | deprecation-and-migration | Remove sistemas antigos e migra usuários com segurança |
 | Entregar | documentation-and-adrs | Documenta o porquê e não só o que |
+| Entregar | observability-and-instrumentation | Logs estruturados, métricas RED, traces e alertas por sintoma |
 | Entregar | shipping-and-launch | Faz release com monitoração e rollback |

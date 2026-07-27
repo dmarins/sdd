@@ -171,6 +171,35 @@ func ResolveTaskService(ctx context.Context, cfg Config, tenantID string) TaskSe
 }
 ```
 
+### Migrações de Schema de Banco (Expand/Contract)
+
+Uma mudança de schema é a migração mais arriscada porque os dados são a única coisa que você não consegue reverter desfazendo um deploy. O modo de falha é acoplar a mudança de schema à mudança de código: renomeie uma coluna na mesma release que começa a usar o nome novo e, durante a janela de rollout — quando código velho e novo rodam ao mesmo tempo — um deles estará consultando uma coluna que não existe. A correção é **nunca mudar uma coluna no lugar**. Migre em fases aditivas, de modo que código velho e novo sejam ambos válidos em cada passo.
+
+```
+EXPAND ──────────────→ MIGRATE ──────────────→ CONTRACT
+adicione a coluna      backfill das linhas      quando nenhum código
+nova, nullable, ao     existentes; dual-write   ler a coluna antiga,
+lado da antiga         de velho+novo pela app   remova-a em um deploy
+                                                posterior e separado
+```
+
+**Exemplo trabalhado — renomear `name` para `full_name`:**
+
+1. **Expand.** Adicione `full_name` como nullable. Faça o deploy. (O código antigo a ignora; nada quebra.)
+2. **Dual-write.** A aplicação escreve `name` e `full_name` em todo insert/update. Faça o deploy.
+3. **Backfill.** Copie `name → full_name` para as linhas existentes, em lotes, para não travar a tabela.
+4. **Troque as leituras.** Aponte a aplicação para `full_name`, continue escrevendo os dois. Faça o deploy e deixe assentar.
+5. **Contract.** Pare de escrever `name` e então — em um deploy *separado, posterior* — remova a coluna.
+
+Cada passo é implantável e reversível de forma independente: se o passo 4 se comportar mal, reverta o código e `full_name` continua sendo populada. Trate cada fase como uma fatia vertical fina — veja a skill `incremental-implementation`. As mesmas fases valem para renomear atributos no DynamoDB: adicione o atributo novo, faça dual-write, backfill por varredura em lotes e só então pare de escrever o antigo.
+
+**Regras:**
+- **Aditivo primeiro, destrutivo por último e sozinho.** Adições (coluna nullable nova, tabela nova, índice novo) são seguras em qualquer deploy; remoções e renames ganham o próprio deploy *depois* que nenhum código referencia o formato antigo.
+- **Toda migração tem caminho de volta testado.** Uma migração que você não consegue reverter é um deploy que você não consegue reverter. Escreva e rode o `down` antes do merge.
+- **Backfill em lotes, fora do caminho quente.** Um único `UPDATE` sobre milhões de linhas trava a tabela; fatie e regule o ritmo.
+- **Construa índices grandes sem bloquear escritas** (ex.: `CREATE INDEX CONCURRENTLY` no Postgres; GSIs no DynamoDB já são construídos online).
+- **Desacople do código por feature flag** quando o cutover for arriscado, exatamente como no padrão Migração com Feature Flag acima.
+
 ## Código Zumbi
 
 Código zumbi é código sem dono claro, com consumidores ativos e manutenção negligenciada. Sinais típicos:

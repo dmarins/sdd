@@ -1,6 +1,6 @@
 ---
 name: git-workflow-and-versioning
-description: Estrutura práticas de fluxo de trabalho com Git. Use ao fazer qualquer mudança de código. Use ao criar commits, branches, resolver conflitos ou quando precisar organizar o trabalho em vários fluxos paralelos.
+description: Estrutura práticas de fluxo de trabalho com Git. Use ao fazer qualquer mudança de código. Use ao criar commits, branches, resolver conflitos ou quando precisar organizar o trabalho em vários fluxos paralelos. Use ao cortar uma release, escolher o bump de versão semântica, criar a tag ou escrever o changelog.
 ---
 
 # Workflow de Git e Versionamento
@@ -66,12 +66,14 @@ x1y2z3a Ajustes gerais, refactor, infra, testes e fixes
 Mensagem de commit deve explicar o *porquê*, não só o *o quê*:
 
 ```text
-feat: adicionar validacao de idempotency key no endpoint de tarefas
+# Bom: explica a intenção
+feat: adicionar validação de idempotency key no endpoint de tarefas
 
-Evita criacoes duplicadas em retries do API Gateway e alinha o handler
+Evita criações duplicadas em retries do API Gateway e alinha o handler
 ao contrato documentado no OpenAPI.
 
-fix: corrigir policy IAM da task-api para leitura no Secrets Manager
+# Ruim: descreve o que já é óbvio pelo diff
+update handler.go
 ```
 
 **Formato:**
@@ -271,6 +273,49 @@ git blame internal/service/task_service.go
 git log --grep="idempotency" --oneline
 ```
 
+## Release e Versionamento
+
+Commits são como *você* acompanha a mudança; uma **versão** é como os seus *consumidores* a acompanham. No momento em que qualquer outra coisa depende do seu código — outro time, um pacote publicado, um cliente implantado — "o mais recente na main" deixa de ser resposta suficiente para "o que estou rodando, e é seguro atualizar?". Um número de versão e um changelog são o contrato que responde a isso.
+
+### Versionamento Semântico
+
+Para qualquer coisa com consumidores, versione `MAJOR.MINOR.PATCH` e deixe o número carregar significado:
+
+```
+  MAJOR  mudança quebrando compatibilidade — consumidores precisam mudar o código para atualizar
+  MINOR  funcionalidade nova, retrocompatível — seguro atualizar
+  PATCH  correção de bug, retrocompatível — seguro atualizar
+```
+
+O número é uma promessa, então faça o código corresponder a ele. Um "patch" que muda comportamento do qual consumidores dependiam é uma mudança major disfarçada (Lei de Hyrum — veja a skill `api-and-interface-design`). Na dúvida sobre se uma mudança quebra compatibilidade, assuma que quebra; um major surpresa é muito mais barato que um consumidor quebrado.
+
+### Crie a tag da release, e deixe a tag ser a fonte de verdade
+
+Uma release é um ponto imutável na história, não uma branch em movimento. Crie a tag para que ela sempre possa ser reproduzida:
+
+```bash
+git tag -a v1.4.0 -m "Release 1.4.0"
+git push origin v1.4.0
+```
+
+Derive a versão da tag em vez de editá-la à mão em arquivos espalhados, para que o artefato, a tag e o changelog nunca possam discordar.
+
+### Mantenha um changelog escrito para humanos
+
+Um changelog não é `git log`. É a resposta curada, voltada ao consumidor, para "o que mudou e isso me afeta?" — agrupada por `Added / Changed / Fixed / Deprecated / Removed / Security`, mais recente no topo, cada entrada formulada em torno do impacto no usuário, não da mecânica interna.
+
+```markdown
+## [1.4.0] - 2025-06-12
+### Added
+- Importação de tarefas em lote via CSV
+### Fixed
+- Deriva de fuso horário nas datas de vencimento de tarefas recorrentes
+### Deprecated
+- `GET /v1/tasks/all` — use o paginado `GET /v1/tasks` (remoção na 2.0)
+```
+
+Escreva a entrada na mesma mudança que faz a mudança, enquanto o impacto está fresco — não reconstruída por arqueologia de commits na hora da release. Mudanças que quebram compatibilidade ganham nota de migração e janela de depreciação (siga a skill `deprecation-and-migration`); entregar a release em si é trabalho da skill `shipping-and-launch` — esta seção é o contrato de versionamento que a alimenta.
+
 ## Racionalizações Comuns
 
 | Racionalização | Realidade |
@@ -281,6 +326,9 @@ git log --grep="idempotency" --oneline
 | "Branch dá trabalho" | Branch curta é barata e evita colisão. A branch longa é que custa caro. |
 | "Depois eu separo esse diff" | Quanto antes dividir, mais seguro e revisável fica. |
 | "Não preciso de `.gitignore`" | Até o dia em que `terraform.tfstate` ou `.env` entra no repositório. |
+| "É só uma correçãozinha, sobe o patch" | Verifique o que os consumidores conseguem observar. Uma mudança de comportamento da qual eles dependiam é major, seja qual for o tamanho do diff. |
+| "O changelog é só o log de commits" | Commits são para você; o changelog é para os consumidores, curado por impacto. Gerar um a partir de commits crus enterra o que importa. |
+| "Escrevemos o changelog na hora da release" | A essa altura o impacto é reconstruído de memória e metade se perdeu. Escreva a entrada junto com a mudança. |
 
 ## Sinais de Alerta
 
@@ -291,6 +339,9 @@ git log --grep="idempotency" --oneline
 - Commit de `.env`, `terraform.tfstate`, binários ou artefatos
 - Branches longas e muito divergentes de `main`
 - Force-push em branch compartilhada
+- Mudança que quebra compatibilidade entregue sob bump minor ou patch
+- Release sem tag, ou número de versão editado à mão fora de sincronia com a tag
+- Release visível ao usuário sem entrada de changelog, ou changelog que é só um despejo de mensagens de commit
 
 ## Verificação
 
@@ -302,3 +353,9 @@ Para cada commit:
 - [ ] O diff não contém segredos
 - [ ] Mudanças de formatação não foram misturadas com comportamento
 - [ ] O `.gitignore` cobre exclusões padrão do stack
+
+Para cada release (qualquer coisa com consumidores):
+
+- [ ] O bump de versão corresponde à mudança: quebra → major, aditiva → minor, correção → patch
+- [ ] A release tem tag, e a versão é derivada da tag, não editada à mão fora de sincronia
+- [ ] O changelog tem uma entrada curada e legível por humanos, agrupada por impacto, para esta versão

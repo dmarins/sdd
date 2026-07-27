@@ -54,6 +54,9 @@ A mudança se encaixa no desenho do sistema?
 - Existe duplicação que deveria virar código compartilhado?
 - Dependências fluem na direção certa, sem acoplamento circular?
 - O nível de abstração é adequado ou há overengineering?
+- **Este refactor reduz complexidade ou apenas a realoca?** Conte os conceitos que um leitor precisa segurar para acompanhar a mudança. Se uma versão "mais limpa" deixa essa contagem inalterada, ela não é mais limpa — prefira a reestruturação que faz branches, modos ou camadas inteiras desaparecerem à que recentraliza a mesma lógica. Prefira deletar uma abstração a poli-la.
+- **Lógica específica de feature está vazando para um módulo compartilhado ou de propósito geral?** Mantenha a lógica na camada dona dela, reuse o helper canônico existente em vez de um quase-duplicado, e não normalize a deriva arquitetural.
+- **Os limites de tipo são explícitos?** Questione `any`/`interface{}` gratuitos, type assertions e fallbacks silenciosos que maquiam uma invariante pouco clara — tornar o limite explícito muitas vezes simplifica o fluxo de controle ao redor.
 
 ### 4. Segurança
 
@@ -77,6 +80,21 @@ Para profiling e otimização, veja `performance-optimization`. A mudança intro
 - Endpoints de lista têm paginação e limites explícitos?
 - Handlers fazem trabalho síncrono que deveria ir para fila ou processamento assíncrono?
 - Memória, timeout e concorrência foram pensados para Lambda e jobs?
+
+## Remédios Estruturais
+
+Quando você sinalizar um problema estrutural, proponha o movimento — não apenas o problema. Uma revisão que só diz "isto está complexo" deixa o autor adivinhando. Recorra a uma reestruturação nomeada:
+
+- **Substitua uma cadeia de condicionais** por um modelo tipado ou um dispatcher explícito.
+- **Colapse branches duplicados** em um único fluxo mais claro.
+- **Separe orquestração de lógica de negócio** para que cada uma se leia sozinha.
+- **Mova lógica específica de feature** de um módulo compartilhado para o pacote dono do conceito.
+- **Reuse o helper canônico** em vez de um quase-duplicado feito sob medida.
+- **Torne um limite de tipo explícito** para que a ramificação a jusante desapareça.
+- **Delete um wrapper de repasse** que adiciona indireção sem esclarecer a API.
+- **Extraia um helper, ou divida um arquivo grande** em módulos focados.
+
+Prefira o remédio que remove peças móveis ao que espalha a mesma complexidade por aí.
 
 ## Tamanho da Mudança
 
@@ -292,6 +310,16 @@ Parte da revisão é revisar dependências:
 5. A licença é compatível?
 
 **Regra:** prefira biblioteca padrão, utilitários existentes e serviços já aprovados. Toda dependência é um compromisso de manutenção.
+
+**Atualizar uma dependência existente** é uma mudança de código como qualquer outra, e os upgrades mais arriscados são os mesclados em lote com uma mensagem tipo "bump deps". Revise-os com a mesma disciplina:
+
+1. **Leia o changelog, não só o número da versão.** Semver é uma promessa que o mantenedor pode não ter cumprido — um "patch" pode carregar mudança de comportamento. Para um bump major, leia as notas de migração e encontre o que quebra.
+2. **Uma dependência por mudança.** Atualize e mescle individualmente (ou em pequenos grupos relacionados). Quando um bump em lote quebra a build, você perdeu qual pacote foi; uma mudança de pacote único torna a causa óbvia e o revert limpo.
+3. **Deixe os testes decidirem.** O upgrade é verificado por uma suíte verde antes *e* depois, não por "instalou". Se a cobertura em torno do comportamento da dependência for rala, essa lacuna é o achado real — adicione um teste primeiro.
+4. **Atenção ao grafo transitivo.** A maioria dos módulos instalados ninguém escolheu diretamente. Revise o diff do `go.sum`, não só do `go.mod`; um único bump direto pode puxar dezenas de mudanças indiretas.
+5. **Mantenha o lockfile honesto.** Commite o `go.sum`, revise o diff dele e nunca o edite à mão. É ele que de fato fixa o que vai para produção.
+
+Para triagem de achados do `govulncheck` e risco de supply chain (typosquatting, mantenedores comprometidos), siga a skill `security-and-hardening` — esta seção cobre o *workflow* de upgrade; aquela cobre o veredito de segurança. Para upgrades de runtime Go e renovação ampla de módulos, use a skill local `go-runtime-and-dependency-upgrades`.
 
 ## Checklist de Review
 

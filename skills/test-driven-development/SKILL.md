@@ -21,6 +21,18 @@ Escreva um teste que falha antes de escrever o código que o faz passar. Em corr
 
 **Relacionado:** para cenarios de browser, combine TDD com verificação em runtime usando DevTools. Essa parte continua aplicavel, mas esta explicitamente rotulada mais abaixo.
 
+## Descubra a Stack Primeiro
+
+O ciclo de TDD é universal; os comandos não são. Antes de escrever o primeiro teste, descubra como *este* repositório testa, e use os comandos dele em cada passo de VERMELHO, VERDE e verificação:
+
+- **Linguagem e sistema de build** — `go.mod`, `package.json`, `pyproject.toml`, `Cargo.toml`, um `Makefile`
+- **Wrappers versionados** — prefira `make tests`, `./gradlew` ou um script do repositório a ferramentas instaladas globalmente
+- **Framework de teste e configuração** — e como rodar um teste focado vs a suíte completa
+- **Convenções existentes** — onde os testes vivem, como os arquivos são nomeados, quais padrões os testes vizinhos seguem
+- **Comandos documentados** — README, CONTRIBUTING e workflows de CI mostram os comandos que de fato bloqueiam merges
+
+Rode o comando de teste focado do repositório durante o loop e o de suíte completa antes de concluir. Nunca assuma um default como `go test ./...` sem conferir — o projeto pode exigir containers, tags de build ou um alvo de Makefile próprio (ex.: `make tests` no my-finances sobe LocalStack antes).
+
 ## O Ciclo de TDD
 
 ```
@@ -344,7 +356,7 @@ Para bugs mais complexos, um subagente pode escrever o teste de reproducao antes
 
 ## Veja Tambem
 
-Para padroes detalhados de teste e anti-padroes, veja `references/testing-patterns.md`.
+Para padroes detalhados de teste e anti-padroes ilustrando estes princípios em Go — table-driven tests, testes de integração com LocalStack, mocks gerados — veja `references/testing-patterns.md`. Os princípios se transferem para qualquer ecossistema; a sintaxe e as ferramentas de lá são específicas do stack deste fork.
 
 ## Justificativas Comuns
 

@@ -157,6 +157,13 @@ Se uma tarefa for L ou maior, ela provavelmente precisa ser quebrada. Agentes op
 - Ela mexe em dois ou mais subsistemas independentes
 - O título exige um "e" para caber tudo, sinal de que são duas tarefas
 
+## Arquivos de Saída
+
+- **Documento de plano:** salve o plano de implementação em `/docs/plan.md`.
+- **Lista de tarefas:** salve a lista de tarefas em formato checklist em `/docs/tasks.md`.
+
+Crie o diretório `docs/` se não existir. Esses caminhos são a convenção esperada pelo comando `/build`, pelo `/resume` e pelo contrato de `docs/workflow-state.md`.
+
 ## Modelo de Documento de Planejamento
 
 ```markdown
@@ -238,3 +245,7 @@ Antes de iniciar a implementação, confirme:
 - [ ] Nenhuma tarefa toca mais do que o necessário
 - [ ] Existem checkpoints entre as fases principais
 - [ ] O plano foi revisado e aprovado por um humano
+
+## Veja Também
+
+Critérios de aceitação são por tarefa e respondem "construímos a coisa certa?". Eles se apoiam na Definition of Done do projeto inteiro, a barra permanente que toda tarefa cruza antes de contar como pronta. Veja `references/definition-of-done.md`.

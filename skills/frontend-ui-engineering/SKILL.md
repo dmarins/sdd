@@ -1,6 +1,6 @@
 ---
 name: frontend-ui-engineering
-description: Constrói UIs com qualidade de produção. Use ao criar ou modificar interfaces voltadas ao usuário. Use ao criar componentes, implementar layouts, gerenciar estado ou quando a saída precisar parecer e se comportar como algo de produção, e não gerado por IA.
+description: Constrói UIs com qualidade de produção, acessíveis e responsivas. Use ao criar ou modificar interfaces e páginas, criar componentes, implementar layouts, atender requisitos de acessibilidade WCAG, gerenciar estado ou quando a saída precisar parecer e se comportar como algo de produção, e não gerado por IA.
 ---
 
 # Frontend UI Engineering
@@ -16,18 +16,6 @@ Construa interfaces com qualidade de produção, acessíveis, performáticas e v
 - Ao implementar layouts responsivos
 - Ao adicionar interatividade ou gerenciamento de estado
 - Ao corrigir problemas visuais ou de UX
-
-## Consulta ao Protótipo Visual (L008)
-
-**Antes de implementar** qualquer tela ou componente, consulte o protótipo visual do projeto se disponível:
-
-1. Use `mcp__stitch__list_screens` para listar as telas do projeto Stitch
-2. Use `mcp__stitch__get_screen` para obter o protótipo das telas-alvo
-3. Consulte também os arquivos de spec visual locais (ex.: `docs/{entidade}-ui.md`)
-
-**Depois de implementar**, consulte novamente as mesmas telas no Stitch e compare visualmente com o resultado entregue. Divergências intencionais (ex.: decisão técnica que conflita com o design) devem ser registradas no handoff ou num ADR.
-
-Se o projeto não tiver Stitch configurado, pule esta etapa — mas registre que não há protótipo disponível.
 
 ## Arquitetura de Componentes
 

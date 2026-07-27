@@ -33,9 +33,19 @@ ADRs registram o raciocínio por trás de decisões técnicas significativas. Es
 - Ao escolher plataforma de hospedagem ou infraestrutura
 - Em qualquer decisão cara de reverter
 
+### Casar com a convenção existente primeiro
+
+Antes de criar um ADR, inspecione o contexto disponível do repositório em busca de uma convenção estabelecida — ADRs existentes, instruções do projeto e configuração ou tooling relacionado a ADRs (ex.: um arquivo `.adr-dir`). Uma convenção estabelecida sobrepõe os defaults abaixo. Case:
+
+- **Localização e formato** — ex.: `docs/adr/*.md`, `Documentation/Decisions/*.rst`, um layout MADR ou um setup do `adr-tools`. Case com o diretório, a extensão de arquivo e a marcação existentes (Markdown vs reStructuredText).
+- **Numeração e nomenclatura** — continue a sequência e o padrão de nome de arquivo existentes (`ADR-004-Titulo.rst`, `0004-titulo.md`, …); não recomece em 001 nem introduza um segundo esquema.
+- **Títulos de seção** — reuse o conjunto de títulos do projeto em vez de impor o deste template.
+
+Se a evidência disponível conflitar, exponha o conflito em vez de introduzir silenciosamente outro esquema. Apenas quando nenhuma convenção puder ser estabelecida, aplique o default abaixo.
+
 ### Template de ADR
 
-Armazene ADRs em `docs/decisions/` com numeração sequencial:
+Armazene ADRs em `docs/decisions/` com numeração sequencial (a menos que o projeto já use outra localização — veja acima):
 
 ```markdown
 # ADR-001: Usar API Gateway + AWS Lambda para a API publica

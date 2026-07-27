@@ -45,6 +45,17 @@ Lance com segurança. O objetivo não é apenas fazer deploy, é fazer deploy co
 - [ ] Retries, DLQ, timeout e idempotência foram revisados
 - [ ] Alarmes e dashboards cobrem erro, latência, throttling e backlog
 
+### Acessibilidade
+
+Quando a release incluir frontend:
+
+- [ ] Navegação por teclado funciona em todos os elementos interativos
+- [ ] Leitor de tela consegue transmitir o conteúdo e a estrutura da página
+- [ ] Contraste de cores atende WCAG 2.1 AA (4.5:1 para texto)
+- [ ] Gerenciamento de foco correto em modais e conteúdo dinâmico
+- [ ] Mensagens de erro são descritivas e associadas aos campos de formulário
+- [ ] Sem avisos de acessibilidade no axe-core ou Lighthouse
+
 ### Infraestrutura
 
 - [ ] `terraform fmt -check`, `terraform validate` e `terraform plan` foram executados
@@ -183,6 +194,47 @@ resource "aws_cloudwatch_metric_alarm" "orders_api_errors" {
 }
 ```
 
+### Relato de Erros (Error Reporting)
+
+No frontend, um error boundary com relato ao serviço de tracking; no backend, relato estruturado sem expor detalhes internos:
+
+```tsx
+// Error boundary com relato
+class ErrorBoundary extends React.Component {
+  componentDidCatch(error: Error, info: React.ErrorInfo) {
+    reportError(error, {
+      componentStack: info.componentStack,
+      userId: getCurrentUser()?.id,
+      page: window.location.pathname,
+    });
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return <ErrorFallback onRetry={() => this.setState({ hasError: false })} />;
+    }
+    return this.props.children;
+  }
+}
+```
+
+```go
+// Backend: reporte com contexto, responda genérico
+func (h Handler) handle(ctx context.Context, req Request) (Response, error) {
+	res, err := h.usecase.Execute(ctx, req)
+	if err != nil {
+		reportError(ctx, err, map[string]string{
+			"method": req.Method,
+			"path":   req.Path,
+			"userId": userIDFrom(ctx),
+		})
+		// Não exponha detalhes internos ao usuário
+		return errorResponse(http.StatusInternalServerError, "INTERNAL_ERROR"), nil
+	}
+	return res, nil
+}
+```
+
 ### Verificação Pós-Lançamento
 
 Na primeira hora depois do deploy:
@@ -227,8 +279,10 @@ Todo deploy precisa de rollback definido antes de acontecer.
 
 ## Veja Também
 
+- Para a Definition of Done do projeto inteiro, que toda mudança precisa cruzar antes desta checklist, veja `references/definition-of-done.md`
 - Para verificações de segurança antes do release, veja `references/security-checklist.md`
 - Para budgets e medições, veja `references/performance-checklist.md`
+- Para verificação de acessibilidade antes do lançamento, veja `references/accessibility-checklist.md`
 
 ## Justificativas Comuns
 
