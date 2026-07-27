@@ -57,13 +57,14 @@ DEFINE        PLAN          BUILD         VERIFY        REVIEW        SHIP
 |---|---|
 | `/spec` | Antes de codar qualquer feature nova — define objetivo, estrutura, testes e limites |
 | `/plan` | Com a spec em mãos — quebra o trabalho em tasks com critérios de aceite |
-| `/build` | Implementa a próxima task (TDD embutido: RED → GREEN → commit; pode compor uma skill de perfil por stack) |
+| `/build` | Implementa a próxima task (TDD embutido: RED → GREEN → commit; pode compor uma skill de perfil por stack). `/build auto` executa o plano inteiro após um único checkpoint de aprovação |
 | `/learn` | Registra uma lição aprendida a partir de erro identificado manualmente ou por review, com promoção explícita quando a regra for global |
 | `/resume` | Retoma uma implementação interrompida reconciliando `/docs` com o estado atual do Git |
 | `/test` | Código legado sem cobertura, ou para isolar e reproduzir um bug |
-| `/code-simplify` | Após o build — limpa sem mudar comportamento |
+| `/simplify` | Após o build — limpa sem mudar comportamento |
 | `/review` | Antes de abrir o PR — revisão em 5 eixos (corretude, legibilidade, arquitetura, segurança, performance) |
-| `/ship` | Antes de abrir o PR — checklist pré-deploy (seg, infra, monitoramento, rollback) |
+| `/ship` | Antes de abrir o PR — fan-out paralelo para `code-reviewer` + `security-auditor` + `test-engineer`, merge em 6 dimensões e decisão GO/NO-GO com plano de rollback |
+| `/webperf` | Auditoria de web performance (Core Web Vitals) via `web-performance-auditor` — apenas para aplicações web |
 
 > **CI/CD automático após merge:** `/review` e `/ship` são pré-requisitos do PR, não pós-merge.
 
@@ -194,8 +195,9 @@ Se já existe uma spec informal ou tarefas planejadas:
 ### Define
 | Skill | Uso |
 |---|---|
+| `interview-me` | Extrair o que o usuário realmente quer, uma pergunta por vez, antes de qualquer plano |
 | `idea-refine` | Refinar uma ideia vaga antes de escrever a spec |
-| `spec-driven-development` | Escrever spec antes de qualquer código |
+| `spec-driven-development` | Escrever spec antes de qualquer código (SPECIFY → PLAN → TASKS → IMPLEMENT) |
 
 ### Plan
 | Skill | Uso |
@@ -209,6 +211,7 @@ Se já existe uma spec informal ou tarefas planejadas:
 | `test-driven-development` | RED → GREEN → Refactor, pirâmide de testes |
 | `context-engineering` | Alimentar o agente com o contexto certo no momento certo |
 | `source-driven-development` | Decisões baseadas na documentação oficial (com citação de fonte) |
+| `doubt-driven-development` | Revisão adversarial de contexto limpo para decisões não triviais, com escalação cross-model opcional |
 | `frontend-ui-engineering` | Componentes, design system, acessibilidade WCAG 2.1 AA |
 | `api-and-interface-design` | Design contract-first, semântica de erros, validação de boundary |
 | `go-aws-serverless-development` | Perfil de execução para projetos Go + AWS + Terraform sem inflar o comando `build` |
@@ -234,6 +237,7 @@ Se já existe uma spec informal ou tarefas planejadas:
 | `ci-cd-and-automation` | Pipelines, quality gates, feature flags |
 | `deprecation-and-migration` | Remoção de sistemas legados, migrações |
 | `documentation-and-adrs` | ADRs — documentar o *porquê*, não o *o quê* |
+| `observability-and-instrumentation` | Logs estruturados, métricas RED, tracing e alertas por sintoma (Go/AWS) |
 | `shipping-and-launch` | Checklist completo pré-deploy |
 
 ### Maintenance
@@ -251,12 +255,16 @@ Invocados explicitamente quando você quer uma perspectiva mais focada:
 |---|---|
 | `code-reviewer` | Revisão profunda como Staff Engineer |
 | `test-engineer` | Estratégia de testes e análise de cobertura |
-| `security-auditor` | Auditoria de segurança, modelagem de ameaças |
+| `security-auditor` | Auditoria de segurança, modelagem de ameaças (inclui funcionalidades de IA/LLM) |
+| `web-performance-auditor` | Auditoria de Core Web Vitals e antipadrões de performance em web apps |
+| `serverless-backend` | Especialista em Go + AWS + Terraform para componentes serverless |
 
 ```
 use code-reviewer to review my last commit
 use security-auditor to audit src/auth/
 ```
+
+Como personas, skills e comandos se compõem — e os padrões de orquestração endossados — está documentado em `docs/agents.md` e `references/orchestration-patterns.md`.
 
 ---
 
@@ -266,13 +274,26 @@ use security-auditor to audit src/auth/
 |---|---|
 | `session-start` | Injeta a meta-skill `using-agent-skills` automaticamente no início de cada sessão |
 | `sdd-cache` | Cache HTTP com revalidação ETag para `source-driven-development` — evita fetches redundantes |
-| `simplify-ignore` | Protege blocos marcados com `/* simplify-ignore-start */` durante o `/code-simplify` |
+| `simplify-ignore` | Protege blocos marcados com `/* simplify-ignore-start */` durante o `/simplify` |
+
+---
+
+## Validação
+
+```bash
+node scripts/validate-skills.js      # valida frontmatter, seções e referências cruzadas de todas as skills
+bash hooks/session-start-test.sh     # valida o payload JSON do hook de início de sessão
+bash hooks/simplify-ignore-test.sh   # valida o hook de proteção de blocos
+```
 
 ---
 
 ## Referências rápidas
 
 - `references/accessibility-checklist.md`
+- `references/definition-of-done.md`
+- `references/observability-checklist.md`
+- `references/orchestration-patterns.md`
 - `references/performance-checklist.md`
 - `references/security-checklist.md`
 - `references/testing-patterns.md`
