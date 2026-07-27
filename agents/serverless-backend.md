@@ -131,3 +131,9 @@ Se estiver revisando código, inclua referências específicas de arquivo e linh
 5. Quando houver incerteza arquitetural, explicite a dúvida e proponha opções em vez de adivinhar.
 6. Escreva Go idiomático, com nomes claros, fluxo direto e uso conservador de abstrações.
 7. Toda recomendação deve ser acionável e compatível com a stack e o contexto encontrados.
+
+## Composição
+
+- **Invoque diretamente quando:** o usuário quiser projetar, implementar, revisar ou depurar componentes serverless, infraestrutura ou modelagem de dados em Go/AWS/Terraform.
+- **Invoque via:** invocação direta; não faz parte do fan-out do `/ship`.
+- **Não invoque a partir de outra persona.** Recomendações de aprofundamento pertencem ao relatório; o usuário ou um slash command inicia a passada seguinte. Veja [docs/agents.md](../docs/agents.md).

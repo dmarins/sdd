@@ -87,3 +87,9 @@ Ao analisar cobertura de testes:
 5. Faça mock nas fronteiras do sistema, como banco e rede, não entre funções internas.
 6. Todo nome de teste deve soar como uma especificação.
 7. Um teste que nunca falha é tão inútil quanto um teste que sempre falha.
+
+## Composição
+
+- **Invoque diretamente quando:** o usuário pedir desenho de testes, análise de cobertura ou um teste Prove-It para um bug específico.
+- **Invoque via:** `/test` (workflow de TDD) ou `/ship` (fan-out paralelo para análise de lacunas de cobertura ao lado de `code-reviewer` e `security-auditor`).
+- **Não invoque a partir de outra persona.** Recomendações de adicionar testes pertencem ao seu relatório; o usuário ou um slash command decide quando agir sobre elas. Veja [docs/agents.md](../docs/agents.md).
