@@ -1,5 +1,5 @@
 ---
-descrição: Inicie o desenvolvimento orientado a especificações — escreva uma especificação estruturada antes de escrever o código
+description: Inicie o desenvolvimento orientado a especificações — escreva uma especificação estruturada antes de escrever o código
 ---
 
 Invoque a habilidade `spec-driven-development`.

@@ -1,5 +1,5 @@
---- 
-descrição: Execute o fluxo de trabalho TDD — escreva testes que falham, implemente e verifique. Para bugs, use o padrão Prove-It.
+---
+description: Execute o fluxo de trabalho TDD — escreva testes que falham, implemente e verifique. Para bugs, use o padrão Prove-It.
 ---
 
 Invoque a habilidade `test-driven-development`.

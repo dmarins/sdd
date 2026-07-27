@@ -1,5 +1,5 @@
---- 
-Descrição: Realize uma revisão de código em cinco eixos — correção, legibilidade, arquitetura, segurança e desempenho
+---
+description: Realize uma revisão de código em cinco eixos — correção, legibilidade, arquitetura, segurança e desempenho
 ---
 
 Invoque a habilidade `code-review-and-quality`.

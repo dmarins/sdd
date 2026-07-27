@@ -1,5 +1,5 @@
---- 
-descrição: Simplifique o código para maior clareza e facilidade de manutenção — reduza a complexidade sem alterar o comportamento.
+---
+description: Simplifique o código para maior clareza e facilidade de manutenção — reduza a complexidade sem alterar o comportamento.
 ---
 
 Invoque a habilidade `code-simplification`.
