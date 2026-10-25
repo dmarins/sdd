@@ -1,6 +1,6 @@
 # Checklist de Acessibilidade
 
-Referência rápida para conformidade com WCAG 2.1 AA. Use em conjunto com a skill `frontend-ui-engineering`.
+Referência rápida para conformidade com WCAG 2.1 AA. Use em conjunto com a skill `impeccable`, em especial o comando `/impeccable audit`.
 
 ## Sumário
 

@@ -21,7 +21,7 @@ Tarefa chega
     ├── Novo projeto, feature ou mudança? ---> spec-driven-development
     ├── Já existe especificação e faltam tarefas? -> planning-and-task-breakdown
     ├── Implementando código? -----------------> incremental-implementation
-    │   ├── UI? ------------------------------> frontend-ui-engineering
+    │   ├── UI? ------------------------------> impeccable (plugin, inline)
     │   ├── API? -----------------------------> api-and-interface-design
     │   ├── Falta contexto? ------------------> context-engineering
     │   ├── Precisa seguir docs oficiais? ----> source-driven-development
@@ -142,6 +142,33 @@ Estes são erros que parecem produtividade, mas criam problema:
 
 4. **Na dúvida, comece por especificação.** Se a tarefa não é trivial e não há spec, comece com `spec-driven-development`.
 
+## Trabalho de Frontend: `impeccable`
+
+Todo trabalho de interface — web ou nativo — passa pela `impeccable`. Ela é a única autoridade de design deste fluxo: hierarquia, layout, tipografia, cor, motion, copy de UI, acessibilidade, comportamento responsivo e captura do design system.
+
+Ela não vive neste repositório. É a skill do plugin `impeccable@impeccable`, instalada no harness, e por isso tem quatro regras próprias:
+
+1. **O identificador de invocação é `impeccable:impeccable`**, no formato `plugin:skill` — não `impeccable` puro. O usuário também pode chamá-la direto por `/impeccable`.
+
+2. **Rode-a inline, nunca dentro de um subagente.** Ela inicia subagentes próprios (`impeccable:impeccable-documenter`, `impeccable:impeccable-finish-reviewer`, `impeccable:impeccable-asset-producer`, `impeccable:impeccable-manual-edit-applier`), e subagente não inicia subagente. Numa task delegada ao `frontend-react`, a passada de design acontece antes, no orquestrador.
+
+3. **O contexto flui por artefato, não por paráfrase.** A impeccable produz `PRODUCT.md`, `DESIGN.md` e briefs de superfície no projeto-alvo. Esses arquivos são o que você passa ao subagente de implementação — mesma disciplina que `/docs/*.md` já segue no `/workflow`.
+
+4. **Escolha o sub-comando pela intenção**, via `/impeccable <comando> [alvo]`:
+
+| Intenção | Comando |
+|---|---|
+| Planejar UX/UI antes de codar | `shape` |
+| Capturar contexto de produto / gerar design system | `init`, `document`, `extract` |
+| Avaliar o que existe | `critique` (review de UX), `audit` (a11y, perf, responsivo) |
+| Refinar antes de entregar | `polish`, `distill`, `harden`, `onboard` |
+| Ajustar a intensidade visual | `bolder`, `quieter`, `overdrive` |
+| Mexer em uma dimensão específica | `layout`, `typeset`, `colorize`, `animate`, `delight` |
+| Corrigir | `clarify` (copy), `adapt` (responsivo), `optimize` (perf de UI) |
+| Iterar em variantes no browser | `live`, `generate` |
+
+Sem argumento, `/impeccable` apresenta um menu contextual e não executa nada por conta própria.
+
 ## Sequência Típica de Ciclo de Vida
 
 Para uma feature completa, a sequência usual é:
@@ -181,7 +208,7 @@ Workflows de manutenção também podem fugir do lifecycle principal. Exemplo: u
 | Construir | source-driven-development | Verifica padrões nas docs oficiais |
 | Construir | doubt-driven-development | Revisão adversarial de contexto limpo em toda decisão não trivial |
 | Construir | context-engineering | Carrega o contexto certo no momento certo |
-| Construir | frontend-ui-engineering | Orienta UI de qualidade de produção |
+| Construir | impeccable | Direção de design e UI de qualidade de produção — skill do plugin `impeccable@impeccable` |
 | Construir | api-and-interface-design | Define contratos claros e estáveis |
 | Verificar | test-driven-development | Teste falhando primeiro, depois implementação |
 | Verificar | browser-testing-with-devtools | Usa DevTools para verificação runtime em browser |

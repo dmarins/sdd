@@ -11,16 +11,17 @@ Antes de implementar cada task, classifique-a explicitamente como **backend**, *
 | Tipo de trabalho | Sinais na task | Skill de domínio | Persona (subagente) |
 |---|---|---|---|
 | **Backend** | Go, Lambda, DynamoDB, API Gateway, Cognito, Terraform, filas, eventos, IAM | `go-aws-serverless-development` | `serverless-backend` |
-| **Frontend** | Componentes React, páginas, layout, interação, estado de UI, acessibilidade, qualquer output visível no browser | `frontend-ui-engineering` (L007) | `frontend-react` |
+| **Frontend** | Componentes React, páginas, layout, interação, estado de UI, acessibilidade, qualquer output visível no browser | `impeccable:impeccable` (L007) | `frontend-react` |
 | **Mista** | Toca ambos os lados (ex.: novo endpoint + tela que o consome) | Ambas — aplique cada skill ao trecho do seu domínio | Uma persona por trecho de domínio |
 | **Geral** | Script utilitário, tooling, CI, doc, integração pontual | Apenas as skills base | Inline (ou `developer`, se exceder o limiar) |
 
 Regras da delegação:
 
 - A classificação é **por task**, não por sessão: um plano pode alternar entre tasks de backend e de frontend, e cada uma carrega apenas a skill do seu domínio.
-- Declare a classificação no início da task (ex.: "Task 3 — frontend → `frontend-ui-engineering`"), para que a delegação fique visível e auditável no handoff.
+- Declare a classificação no início da task (ex.: "Task 3 — frontend → `impeccable`"), para que a delegação fique visível e auditável no handoff.
 - Se a task não se encaixar em nenhum tipo (ex.: script utilitário, doc, CI), siga apenas com as skills base — não force uma skill de domínio que não se aplica.
 - Em caso de dúvida sobre a classificação, pare e pergunte antes de implementar — não adivinhe o domínio.
+- **A `impeccable` roda sempre inline, nunca dentro de um subagente.** Ela é a skill `impeccable:impeccable`, do plugin `impeccable@impeccable`, e inicia subagentes próprios (`impeccable:impeccable-documenter`, `impeccable:impeccable-finish-reviewer`, `impeccable:impeccable-asset-producer`, `impeccable:impeccable-manual-edit-applier`) — e subagente não inicia subagente. Numa task frontend delegada, você executa a passada de design antes de iniciar o `frontend-react` e passa os artefatos resultantes — `PRODUCT.md`, `DESIGN.md` e o brief da superfície — no prompt dele.
 
 ## Delegação a subagente
 

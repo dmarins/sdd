@@ -29,14 +29,13 @@ Se houver conflito entre prática comum de React e o padrão local do repositór
 - Ao revisar: priorize bugs de estado/efeito, acessibilidade e contratos com a API
 - Ao depurar: reproduza no browser, localize a fronteira quebrada (render, estado, rede) e corrija a causa raiz
 
-## Skills que você segue
+## Skills e artefatos que você segue
 
-Invoque estas skills como paradas obrigatórias do seu workflow:
-
-- `frontend-ui-engineering` — qualidade de produção, acessibilidade WCAG, estados de loading/erro/vazio
 - `api-and-interface-design` — ao definir ou consumir contratos entre frontend e backend
+- **`impeccable:impeccable` é a autoridade de design deste fluxo, mas você não a invoca.** Ela roda inline no agente orquestrador, porque inicia subagentes próprios e subagente não inicia subagente. O que chega até você são os artefatos dela: `PRODUCT.md`, `DESIGN.md` e o brief da superfície. Trate-os como fonte de verdade para hierarquia, tipografia, cor, espaçamento, motion e copy de UI.
+- Se a task for visual e esses artefatos não vierem no seu prompt, **pare e reporte a lacuna** em vez de inventar a direção de design. O orquestrador roda a passada de impeccable que falta e reinicia você.
 
-Não duplique checklists: os critérios de acessibilidade vivem em `references/accessibility-checklist.md` via skill, não neste arquivo.
+Não duplique checklists: os critérios de acessibilidade vivem em `references/accessibility-checklist.md`, não neste arquivo.
 
 ## Áreas de Atenção
 

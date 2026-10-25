@@ -239,7 +239,7 @@ Se já existe uma spec informal ou tarefas planejadas:
 | `context-engineering` | Alimentar o agente com o contexto certo no momento certo |
 | `source-driven-development` | Decisões baseadas na documentação oficial (com citação de fonte) |
 | `doubt-driven-development` | Revisão adversarial de contexto limpo para decisões não triviais, com escalação cross-model opcional |
-| `frontend-ui-engineering` | Componentes, design system, acessibilidade WCAG 2.1 AA |
+| `impeccable:impeccable` | Todo trabalho de frontend — direção de design, componentes, design system, acessibilidade WCAG 2.1 AA. Skill externa, do plugin `impeccable@impeccable` |
 | `api-and-interface-design` | Design contract-first, semântica de erros, validação de boundary |
 | `go-aws-serverless-development` | Perfil de execução para projetos Go + AWS + Terraform sem inflar o comando `build` |
 
